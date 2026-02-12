@@ -2,40 +2,91 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FisioHome Pro - Gestão Domiciliar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FisioHome Pro | Gestão de Fisioterapia Domiciliar</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Dependências do React 18 -->
+    <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Prop-Types (Necessário para o Recharts em modo UMD) -->
+    <!-- Prop-Types -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
     
-    <!-- Recharts (Gráficos) -->
+    <!-- Recharts -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Babel para JSX -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .recharts-responsive-container { min-height: 300px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg);
+            -webkit-tap-highlight-color: transparent;
+            color: #1e293b;
+        }
+
+        /* Otimização de inputs para mobile */
+        input, textarea, select {
+            font-size: 16px !important; /* Evita zoom automático no iOS */
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        /* Animações suaves */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Botão de Barthel selecionado */
+        .barthel-btn-active {
+            background-color: #10b981 !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+            transform: scale(1.05);
+        }
     </style>
 </head>
-<body class="bg-[#FBFBFB]">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
-        
+        const { useState, useEffect, useMemo, useCallback, useRef } = React;
+        const { 
+            LineChart, Line, XAxis, YAxis, CartesianGrid, 
+            Tooltip, ResponsiveContainer, Legend 
+        } = window.Recharts;
+
+        // --- COMPONENTES AUXILIARES ---
+        const Icon = ({ name, size = 20, className = "" }) => (
+            <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>
+        );
+
         // --- COMPONENTE PRINCIPAL ---
         const App = () => {
             const [activeTab, setActiveTab] = useState('dashboard');
@@ -43,20 +94,13 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [isSaving, setIsSaving] = useState(false);
             
-            // Verificação de segurança para o Recharts
-            const RechartsLib = window.Recharts;
-            const { 
-                LineChart, Line, XAxis, YAxis, CartesianGrid, 
-                Tooltip, ResponsiveContainer, Legend 
-            } = RechartsLib || {};
-
-            // URL do seu Google Apps Script
+            // CONFIGURAÇÃO: URL do Google Apps Script
             const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwraRNSqAc8jCGUXrwTaZv3iuyNfm_z4kW0o_xyWywMoA7pKTtOCVKx-wu5CnUI59cD/exec"; 
 
             const [patients, setPatients] = useState([
                 { 
                     id: 1, 
-                    name: 'Sr. Wilson Ferreira', 
+                    name: 'Wilson Ferreira', 
                     age: 78, 
                     clinicalDiagnosis: 'Pós-AVC Isquêmico',
                     evaluations: [
@@ -67,20 +111,20 @@
                             dia: '90', 
                             sts: 8, 
                             weight: '75', 
-                            echo: '1.2cm',
+                            echo: '1.2',
                             functionalChecks: ['Redução de Força', 'Déficit de Equilíbrio'],
-                            notes: 'Paciente com hemiparesia à direita.'
+                            notes: 'Paciente apresenta hemiparesia à direita.'
                         },
                         { 
                             date: '01/04/24', 
-                            barthel: 62, 
-                            sys: '135', 
-                            dia: '85', 
+                            barthel: 65, 
+                            sys: '132', 
+                            dia: '84', 
                             sts: 12, 
                             weight: '74', 
-                            echo: '1.4cm',
+                            echo: '1.4',
                             functionalChecks: ['Redução de Força'],
-                            notes: 'Melhora no controle de tronco.'
+                            notes: 'Melhora no controle de tronco e bipedestação.'
                         }
                     ]
                 }
@@ -93,27 +137,30 @@
             ];
 
             const [newPatient, setNewPatient] = useState({ name: '', age: '', clinicalDiagnosis: '' });
+            
             const [newEval, setNewEval] = useState({
                 date: new Date().toLocaleDateString('pt-BR'),
-                sys: '', dia: '', weight: '', height: '',
+                sys: '', dia: '', weight: '', echo: '',
                 barthel: { 
                     alimentacao: 0, banho: 0, higiene: 0, vestir: 0, 
                     intestino: 0, bexiga: 0, banheiro: 0, transferencia: 0, 
                     mobilidade: 0, escadas: 0 
                 },
-                sts: '', echo: '', functionalChecks: [], notes: ''
+                sts: '', functionalChecks: [], notes: ''
             });
 
-            // Atualiza ícones Lucide sempre que a tela muda
+            // Efeito para recarregar ícones Lucide
             useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            }, [activeTab, selectedPatientId, patients]);
+                if (window.lucide) window.lucide.createIcons();
+            });
 
-            const selectedPatient = patients.find(p => p.id === selectedPatientId);
+            const selectedPatient = useMemo(() => 
+                patients.find(p => p.id === selectedPatientId), 
+            [patients, selectedPatientId]);
+
             const calculateBarthel = (b) => Object.values(b).reduce((acc, curr) => acc + parseInt(curr), 0);
 
+            // Handlers de Ações
             const handleSaveEvaluation = async (e) => {
                 e.preventDefault();
                 setIsSaving(true);
@@ -132,14 +179,19 @@
 
                     if (GOOGLE_SCRIPT_URL) {
                         await fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'no-cors', 
-                            cache: 'no-cache',
+                            method: 'POST', mode: 'no-cors', cache: 'no-cache',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(evaluationData)
                         });
                     }
                     setActiveTab('profile');
+                    // Reset do form de avaliação
+                    setNewEval({
+                        date: new Date().toLocaleDateString('pt-BR'),
+                        sys: '', dia: '', weight: '', echo: '',
+                        barthel: { alimentacao: 0, banho: 0, higiene: 0, vestir: 0, intestino: 0, bexiga: 0, banheiro: 0, transferencia: 0, mobilidade: 0, escadas: 0 },
+                        sts: '', functionalChecks: [], notes: ''
+                    });
                 } catch (error) {
                     console.error("Erro ao salvar:", error);
                 } finally {
@@ -147,108 +199,159 @@
                 }
             };
 
-            const Dashboard = () => (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-black text-slate-800">Prontuários</h2>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Atendimento Domiciliar</p>
-                        </div>
-                        <button onClick={() => setActiveTab('newPatient')} className="bg-emerald-600 text-white p-4 rounded-2xl shadow-lg flex items-center gap-2">
-                            <i data-lucide="plus-circle"></i> <span className="hidden sm:inline font-bold">Novo Paciente</span>
-                        </button>
-                    </div>
+            const toggleFunctionalCheck = (opt) => {
+                const exists = newEval.functionalChecks.includes(opt);
+                setNewEval(prev => ({
+                    ...prev,
+                    functionalChecks: exists 
+                        ? prev.functionalChecks.filter(i => i !== opt) 
+                        : [...prev.functionalChecks, opt]
+                }));
+            };
 
-                    <div className="relative">
-                        <i data-lucide="search" className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+            const handleBarthelChange = (key, val) => {
+                setNewEval(prev => ({
+                    ...prev,
+                    barthel: { ...prev.barthel, [key]: val }
+                }));
+            };
+
+            // --- RENDERIZAÇÃO DE TELAS ---
+
+            const renderDashboard = () => (
+                <div className="space-y-6 fade-in">
+                    <header className="flex justify-between items-center mb-8">
+                        <div>
+                            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Pacientes</h2>
+                            <p className="text-slate-500 font-medium">Gestão de Reabilitação Domiciliar</p>
+                        </div>
+                        <button 
+                            onClick={() => setActiveTab('newPatient')} 
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-2xl shadow-lg shadow-emerald-100 transition-all flex items-center gap-2 active:scale-95"
+                        >
+                            <Icon name="plus-circle" size={24} />
+                        </button>
+                    </header>
+
+                    <div className="relative group">
+                        <Icon name="search" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                         <input 
                             type="text" 
-                            placeholder="Buscar paciente..." 
-                            className="w-full pl-12 pr-4 py-4 rounded-2xl border-none shadow-sm bg-white outline-none focus:ring-2 focus:ring-emerald-500"
+                            placeholder="Buscar paciente ou diagnóstico..." 
+                            className="w-full pl-12 pr-4 py-5 rounded-3xl border-none shadow-sm bg-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-slate-700 font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
 
-                    <div className="grid gap-3">
+                    <div className="grid gap-4">
                         {patients.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(p => (
                             <div 
                                 key={p.id} 
-                                className="bg-white p-5 rounded-3xl shadow-sm border border-slate-50 flex items-center justify-between hover:scale-[1.01] transition-transform cursor-pointer"
+                                className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
                                 onClick={() => { setSelectedPatientId(p.id); setActiveTab('profile'); }}
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center font-black text-xl border border-slate-100">{p.name[0]}</div>
+                                <div className="flex items-center gap-5">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center font-extrabold text-2xl">
+                                        {p.name[0]}
+                                    </div>
                                     <div>
-                                        <h3 className="font-bold text-slate-800 text-lg">{p.name}</h3>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-tight">{p.clinicalDiagnosis}</p>
+                                        <h3 className="font-bold text-slate-800 text-lg leading-tight">{p.name}</h3>
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{p.clinicalDiagnosis}</p>
                                     </div>
                                 </div>
-                                <i data-lucide="chevron-right" className="text-slate-300"></i>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right hidden sm:block">
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Último Score</p>
+                                        <p className="text-lg font-black text-emerald-600 leading-none">{p.evaluations.at(-1)?.barthel || '--'}</p>
+                                    </div>
+                                    <Icon name="chevron-right" className="text-slate-300" />
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             );
 
-            const PatientProfile = () => (
-                <div className="space-y-6 pb-20">
+            const renderProfile = () => (
+                <div className="space-y-6 pb-24 fade-in">
                     <div className="flex items-center justify-between">
-                        <button onClick={() => setActiveTab('dashboard')} className="p-3 bg-white rounded-2xl shadow-sm text-slate-500 hover:text-emerald-600"><i data-lucide="arrow-left"></i></button>
+                        <button onClick={() => setActiveTab('dashboard')} className="p-4 bg-white rounded-2xl shadow-sm text-slate-500 hover:text-emerald-600 transition-all"><Icon name="arrow-left" size={24} /></button>
                         <div className="flex gap-2">
-                           <button className="p-3 bg-white rounded-2xl shadow-sm text-slate-400"><i data-lucide="share-2"></i></button>
-                           <button className="p-3 bg-white rounded-2xl shadow-sm text-slate-400"><i data-lucide="file-text"></i></button>
+                           <button className="p-4 bg-white rounded-2xl shadow-sm text-slate-400 hover:text-emerald-500"><Icon name="share-2" size={20} /></button>
+                           <button className="p-4 bg-white rounded-2xl shadow-sm text-slate-400 hover:text-blue-500"><Icon name="file-text" size={20} /></button>
                         </div>
                     </div>
 
-                    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-50">
+                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
                         <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
-                            <div className="space-y-2">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">Registro Profissional</span>
-                                <h2 className="text-4xl font-black text-slate-800 leading-none">{selectedPatient?.name}</h2>
-                                <p className="text-slate-400 font-bold uppercase text-xs">
-                                    {selectedPatient?.clinicalDiagnosis} • {selectedPatient?.age} anos
-                                </p>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">Prontuário Ativo</span>
+                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 leading-tight">{selectedPatient?.name}</h2>
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-tighter">
+                                        {selectedPatient?.clinicalDiagnosis}
+                                    </span>
+                                    <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase">
+                                        {selectedPatient?.age} ANOS
+                                    </span>
+                                </div>
                             </div>
                             <button 
                                 onClick={() => setActiveTab('newEval')}
-                                className="w-full md:w-auto bg-slate-900 text-white px-8 py-5 rounded-[1.5rem] flex items-center justify-center gap-3 font-black shadow-2xl hover:bg-emerald-600 transition-all"
+                                className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white px-10 py-5 rounded-3xl flex items-center justify-center gap-3 font-black shadow-xl shadow-slate-200 transition-all active:scale-95"
                             >
-                                <i data-lucide="activity"></i> Reavaliar
+                                <Icon name="activity" size={22} /> NOVA AVALIAÇÃO
                             </button>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2 space-y-4">
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">Curva de Recuperação</h3>
-                                <div className="h-80 w-full bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
-                                    {selectedPatient?.evaluations.length > 1 && LineChart ? (
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Icon name="trending-up" size={16} className="text-emerald-500" /> Histórico Funcional
+                                </h3>
+                                <div className="h-80 w-full bg-slate-50/50 p-6 rounded-[2.5rem] border border-slate-100">
+                                    {selectedPatient?.evaluations.length > 1 ? (
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={selectedPatient?.evaluations}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                                <XAxis dataKey="date" fontSize={10} tick={{fill: '#94a3b8'}} />
-                                                <YAxis fontSize={10} tick={{fill: '#94a3b8'}} />
-                                                <Tooltip contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                                <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
+                                                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
+                                                <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
                                                 <Legend iconType="circle" />
-                                                <Line type="monotone" dataKey="barthel" name="Barthel" stroke="#10b981" strokeWidth={5} dot={{r: 6, fill: '#10b981'}} />
-                                                <Line type="monotone" dataKey="sts" name="STS" stroke="#3b82f6" strokeWidth={5} dot={{r: 6, fill: '#3b82f6'}} />
+                                                <Line type="monotone" dataKey="barthel" name="Barthel" stroke="#10b981" strokeWidth={6} dot={{r: 8, fill: '#10b981', strokeWidth: 3, stroke: '#fff'}} activeDot={{r: 10}} />
+                                                <Line type="monotone" dataKey="sts" name="STS" stroke="#3b82f6" strokeWidth={6} dot={{r: 8, fill: '#3b82f6', strokeWidth: 3, stroke: '#fff'}} activeDot={{r: 10}} />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                                            <i data-lucide="trending-up" className="w-12 h-12 opacity-20"></i>
-                                            <p className="text-sm font-bold">Gráfico disponível após 2 avaliações</p>
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4">
+                                            <Icon name="bar-chart-3" size={48} className="opacity-20" />
+                                            <p className="text-sm font-bold opacity-60">Gráfico será gerado após 2 avaliações</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            <div className="bg-emerald-600 text-white p-7 rounded-[2rem] shadow-xl flex flex-col justify-center">
-                                <p className="text-[10px] font-black opacity-60 uppercase mb-4 tracking-widest">Score Barthel Atual</p>
-                                <h4 className="text-6xl font-black">{selectedPatient?.evaluations.length > 0 ? selectedPatient.evaluations.at(-1)?.barthel : '00'}</h4>
-                                <div className="mt-6 flex flex-wrap gap-1.5">
-                                    {selectedPatient?.evaluations.at(-1)?.functionalChecks.map((c, i) => (
-                                        <span key={i} className="text-[9px] bg-white/20 px-2 py-1 rounded font-black uppercase">{c}</span>
-                                    ))}
+
+                            <div className="space-y-6">
+                                <div className="bg-emerald-600 text-white p-8 rounded-[2.5rem] shadow-2xl shadow-emerald-100 flex flex-col justify-between h-full min-h-[250px]">
+                                    <div>
+                                        <p className="text-[10px] font-black opacity-60 uppercase mb-4 tracking-widest">Score Barthel Atual</p>
+                                        <div className="flex items-baseline gap-2">
+                                            <h4 className="text-7xl font-black">{selectedPatient?.evaluations.at(-1)?.barthel || '00'}</h4>
+                                            <span className="text-lg opacity-60 font-bold">/100</span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-8">
+                                        <p className="text-[10px] font-black opacity-60 uppercase mb-3 tracking-widest">Diagnóstico Funcional</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {selectedPatient?.evaluations.at(-1)?.functionalChecks.map((c, i) => (
+                                                <span key={i} className="text-[9px] bg-white/20 px-2 py-1 rounded font-black uppercase tracking-tight">{c}</span>
+                                            )) || <span className="text-xs opacity-50 italic">Nenhum registro</span>}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -256,38 +359,60 @@
                 </div>
             );
 
-            const EvaluationForm = () => (
-                <div className="max-w-4xl mx-auto space-y-6 pb-24">
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-3xl shadow-sm border border-slate-50">
-                        <button onClick={() => setActiveTab('profile')} className="p-2 bg-slate-50 rounded-xl text-slate-500 hover:text-emerald-600"><i data-lucide="arrow-left"></i></button>
-                        <h2 className="text-lg font-black text-slate-800">Avaliação Ciclo 4 Semanas</h2>
+            const renderEvaluationForm = () => (
+                <div className="max-w-4xl mx-auto space-y-6 pb-24 fade-in">
+                    <div className="flex items-center gap-4 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-50">
+                        <button type="button" onClick={() => setActiveTab('profile')} className="p-3 bg-slate-50 rounded-2xl text-slate-500"><Icon name="arrow-left" size={20} /></button>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avaliando Paciente</p>
+                            <h2 className="text-lg font-black text-slate-800">{selectedPatient?.name}</h2>
+                        </div>
                     </div>
 
                     <form onSubmit={handleSaveEvaluation} className="space-y-6">
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                            <h3 className="font-black text-slate-800 mb-8 border-b pb-4 flex items-center gap-2"><i data-lucide="stethoscope" className="text-emerald-500 w-5 h-5"></i> Sinais Vitais</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {/* Seção Sinais Vitais */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                            <h3 className="font-black text-slate-800 mb-8 border-b border-slate-50 pb-5 flex items-center gap-3 text-sm uppercase tracking-[0.2em]">
+                                <Icon name="stethoscope" className="text-emerald-500" /> Sinais Vitais & Biometria
+                            </h3>
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                                 {[
-                                    { id: 'sys', label: 'Sistólica (PA)' },
-                                    { id: 'dia', label: 'Diastólica (PA)' },
-                                    { id: 'weight', label: 'Peso (Kg)' },
-                                    { id: 'echo', label: 'ECO (cm)' }
+                                    { id: 'sys', label: 'PA Sistólica', placeholder: '120' },
+                                    { id: 'dia', label: 'PA Diastólica', placeholder: '80' },
+                                    { id: 'weight', label: 'Peso (Kg)', placeholder: '75.0' },
+                                    { id: 'echo', label: 'ECO (cm)', placeholder: '1.2' }
                                 ].map(f => (
-                                    <div key={f.id} className="space-y-1">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase">{f.label}</label>
-                                        <input className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500" value={newEval[f.id]} onChange={e => setNewEval({...newEval, [f.id]: e.target.value})} />
+                                    <div key={f.id} className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{f.label}</label>
+                                        <input 
+                                            type="text" 
+                                            inputMode="decimal"
+                                            placeholder={f.placeholder}
+                                            className="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 transition-shadow" 
+                                            value={newEval[f.id]} 
+                                            onChange={e => setNewEval({...newEval, [f.id]: e.target.value})} 
+                                        />
                                     </div>
                                 ))}
                             </div>
-                            <div className="mt-6">
-                                <label className="text-[10px] font-black text-slate-400 uppercase">STS (Senta e Levanta - 30s)</label>
-                                <input type="number" className="w-full p-5 bg-slate-50 rounded-2xl outline-none font-black text-2xl text-emerald-600 focus:ring-2 focus:ring-emerald-500" value={newEval.sts} onChange={e => setNewEval({...newEval, sts: e.target.value})} />
+                            <div className="mt-8 space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Teste Senta e Levanta (30 Segundos)</label>
+                                <input 
+                                    type="number" 
+                                    placeholder="Nº de repetições"
+                                    className="w-full p-6 bg-slate-50 border-none rounded-2xl outline-none font-black text-3xl text-emerald-600 focus:ring-2 focus:ring-emerald-500 transition-all" 
+                                    value={newEval.sts} 
+                                    onChange={e => setNewEval({...newEval, sts: e.target.value})} 
+                                />
                             </div>
                         </div>
 
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                            <h3 className="font-black text-slate-800 mb-8 border-b pb-4 flex items-center gap-2"><i data-lucide="clipboard-check" className="text-emerald-500 w-5 h-5"></i> Escala de Barthel</h3>
-                            <div className="space-y-3">
+                        {/* Seção Barthel */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                            <h3 className="font-black text-slate-800 mb-8 border-b border-slate-50 pb-5 flex items-center gap-3 text-sm uppercase tracking-[0.2em]">
+                                <Icon name="clipboard-list" className="text-emerald-500" /> Escala de Barthel Automatizada
+                            </h3>
+                            <div className="grid gap-4">
                                 {[
                                     { id: 'alimentacao', label: 'Alimentação', options: [0, 5, 10] },
                                     { id: 'banho', label: 'Banho', options: [0, 5] },
@@ -300,63 +425,136 @@
                                     { id: 'mobilidade', label: 'Mobilidade', options: [0, 5, 10, 15] },
                                     { id: 'escadas', label: 'Escadas', options: [0, 5, 10] },
                                 ].map(item => (
-                                    <div key={item.id} className="flex justify-between items-center p-3 bg-slate-50/50 rounded-2xl">
-                                        <span className="text-sm font-bold text-slate-600">{item.label}</span>
-                                        <div className="flex gap-1.5">
+                                    <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-slate-50/50 rounded-3xl border border-slate-50 gap-4">
+                                        <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                                        <div className="flex gap-2">
                                             {item.options.map(val => (
-                                                <button key={val} type="button" onClick={() => setNewEval({...newEval, barthel: {...newEval.barthel, [item.id]: val}})} className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${newEval.barthel[item.id] === val ? 'bg-emerald-600 text-white shadow-md' : 'bg-white text-slate-300 hover:text-slate-500'}`}>{val}</button>
+                                                <button 
+                                                    key={val} 
+                                                    type="button" 
+                                                    onClick={() => handleBarthelChange(item.id, val)} 
+                                                    className={`w-12 h-12 rounded-2xl text-xs font-black transition-all ${newEval.barthel[item.id] === val ? 'barthel-btn-active' : 'bg-white text-slate-300 hover:text-slate-500 border border-slate-100'}`}
+                                                >
+                                                    {val}
+                                                </button>
                                             ))}
                                         </div>
                                     </div>
                                 ))}
-                                <div className="mt-8 p-8 bg-emerald-600 rounded-[2rem] text-white flex justify-between items-center shadow-xl">
-                                    <span className="font-black uppercase text-xs tracking-widest opacity-80">Total Score Barthel</span>
-                                    <span className="text-4xl font-black">{calculateBarthel(newEval.barthel)}</span>
+                                <div className="mt-8 p-8 bg-emerald-600 rounded-[2.5rem] text-white flex justify-between items-center shadow-2xl shadow-emerald-100">
+                                    <span className="font-black uppercase text-xs tracking-widest opacity-70">Total Score Funcional</span>
+                                    <span className="text-5xl font-black">{calculateBarthel(newEval.barthel)} <span className="text-sm opacity-50">/100</span></span>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Seção Diagnóstico Funcional */}
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                            <h3 className="font-black text-slate-800 mb-8 border-b border-slate-50 pb-5 flex items-center gap-3 text-sm uppercase tracking-[0.2em]">
+                                <Icon name="check-square" className="text-emerald-500" /> Diagnóstico Funcional (Checklist)
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {functionalOptions.map(opt => (
+                                    <button
+                                        key={opt}
+                                        type="button"
+                                        onClick={() => toggleFunctionalCheck(opt)}
+                                        className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all text-left active:scale-[0.98] ${newEval.functionalChecks.includes(opt) ? 'bg-emerald-50 border-emerald-600 text-emerald-800 font-bold' : 'bg-white border-slate-100 text-slate-300 font-medium'}`}
+                                    >
+                                        <Icon name={newEval.functionalChecks.includes(opt) ? "check-circle-2" : "circle"} className={newEval.functionalChecks.includes(opt) ? "text-emerald-600" : "opacity-30"} />
+                                        <span className="text-sm">{opt}</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="mt-10">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Notas de Evolução e Conduta</label>
+                                <textarea 
+                                    placeholder="Descreva o plano terapêutico para as próximas 4 semanas..."
+                                    className="w-full p-6 bg-slate-50 border-none rounded-[2rem] h-48 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700"
+                                    value={newEval.notes}
+                                    onChange={e => setNewEval({...newEval, notes: e.target.value})}
+                                />
                             </div>
                         </div>
 
                         <button 
                             type="submit" 
                             disabled={isSaving}
-                            className={`w-full py-6 rounded-[2rem] font-black text-xl shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'bg-slate-400' : 'bg-slate-900 text-white active:scale-95'}`}
+                            className={`w-full py-8 rounded-[2.5rem] font-black text-xl shadow-2xl transition-all flex items-center justify-center gap-4 ${isSaving ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:bg-black text-white active:scale-95'}`}
                         >
-                            {isSaving ? "Sincronizando..." : "Finalizar e Salvar"}
+                            {isSaving ? <Icon name="loader" className="animate-spin" /> : <Icon name="save" size={24} />}
+                            {isSaving ? "SINCRONIZANDO..." : "FINALIZAR E SALVAR AVALIAÇÃO"}
                         </button>
                     </form>
                 </div>
             );
 
-            return (
-                <div className="min-h-screen md:pl-72">
-                    <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r hidden md:flex flex-col p-10 z-50">
-                        <div className="flex items-center gap-3 mb-16">
-                            <div className="bg-emerald-600 p-3 rounded-2xl text-white shadow-2xl"><i data-lucide="stethoscope"></i></div>
-                            <h1 className="text-2xl font-black text-slate-800 tracking-tighter">Fisio<span className="text-emerald-600">Home</span></h1>
+            const renderNewPatientForm = () => (
+                <div className="max-w-xl mx-auto bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 fade-in">
+                    <h2 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Novo Paciente</h2>
+                    <form onSubmit={(e) => { 
+                        e.preventDefault(); 
+                        setPatients([...patients, {...newPatient, id: Date.now(), evaluations: []}]); 
+                        setActiveTab('dashboard'); 
+                        setNewPatient({ name: '', age: '', clinicalDiagnosis: '' });
+                    }} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Nome Completo</label>
+                            <input required placeholder="Ex: Maria Souza" className="w-full p-5 bg-slate-50 border-none rounded-2xl outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
                         </div>
-                        <nav className="space-y-6">
-                            <button onClick={() => {setActiveTab('dashboard'); setSelectedPatientId(null);}} className={`w-full flex items-center gap-4 px-6 py-5 rounded-3xl font-black text-sm transition-all ${activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:bg-slate-50'}`}>
-                                <i data-lucide="users"></i> Pacientes
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Diagnóstico Clínico</label>
+                            <input required placeholder="Ex: Doença de Parkinson" className="w-full p-5 bg-slate-50 border-none rounded-2xl outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.clinicalDiagnosis} onChange={e => setNewPatient({...newPatient, clinicalDiagnosis: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Idade</label>
+                            <input type="number" placeholder="Ex: 65" className="w-full p-5 bg-slate-50 border-none rounded-2xl outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.age} onChange={e => setNewPatient({...newPatient, age: e.target.value})} />
+                        </div>
+                        <div className="pt-4 flex flex-col gap-3">
+                            <button type="submit" className="w-full py-5 bg-emerald-600 text-white rounded-3xl font-black shadow-xl shadow-emerald-50 hover:bg-emerald-700 transition-all">CADASTRAR PACIENTE</button>
+                            <button type="button" onClick={() => setActiveTab('dashboard')} className="w-full py-5 text-slate-400 font-bold hover:text-slate-600 transition-colors">CANCELAR</button>
+                        </div>
+                    </form>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen">
+                    {/* Sidebar Desktop */}
+                    <aside className="fixed left-0 top-0 h-full w-72 bg-white border-r hidden md:flex flex-col p-10 z-50">
+                        <div className="flex items-center gap-4 mb-16">
+                            <div className="bg-emerald-600 p-3.5 rounded-2xl text-white shadow-2xl shadow-emerald-100"><Icon name="stethoscope" size={32} /></div>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tighter">Fisio<span className="text-emerald-600 font-extrabold">Home</span></h1>
+                        </div>
+                        <nav className="space-y-4">
+                            <button onClick={() => {setActiveTab('dashboard'); setSelectedPatientId(null);}} className={`w-full flex items-center gap-4 px-7 py-5 rounded-[1.5rem] font-black text-sm transition-all ${activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-2xl shadow-slate-200' : 'text-slate-400 hover:bg-slate-50'}`}>
+                                <Icon name="users" /> PACIENTES
+                            </button>
+                            <button className="w-full flex items-center gap-4 px-7 py-5 rounded-[1.5rem] text-slate-300 font-black text-sm cursor-not-allowed opacity-50">
+                                <Icon name="calendar" /> AGENDA
                             </button>
                         </nav>
+                        <div className="mt-auto p-6 bg-slate-50 rounded-[2rem]">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status da Nuvem</p>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span className="text-xs font-bold text-slate-600 tracking-tight">Sheets Conectado</span>
+                            </div>
+                        </div>
                     </aside>
 
-                    <main className="p-6 md:p-16 max-w-7xl mx-auto">
-                        {activeTab === 'dashboard' && <Dashboard />}
-                        {activeTab === 'profile' && <PatientProfile />}
-                        {activeTab === 'newEval' && <EvaluationForm />}
-                        {activeTab === 'newPatient' && (
-                           <div className="max-w-xl mx-auto bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-                             <h2 className="text-3xl font-black text-slate-800 mb-8">Novo Paciente</h2>
-                             <form onSubmit={(e) => { e.preventDefault(); setPatients([...patients, {...newPatient, id: Date.now(), evaluations: []}]); setActiveTab('dashboard'); }} className="space-y-6">
-                                <input required placeholder="Nome Completo" className="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
-                                <input required placeholder="Diagnóstico Clínico" className="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500" value={newPatient.clinicalDiagnosis} onChange={e => setNewPatient({...newPatient, clinicalDiagnosis: e.target.value})} />
-                                <input type="number" placeholder="Idade" className="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold focus:ring-2 focus:ring-emerald-500" value={newPatient.age} onChange={e => setNewPatient({...newPatient, age: e.target.value})} />
-                                <button type="submit" className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-xl hover:bg-emerald-700 transition-all">Cadastrar Paciente</button>
-                                <button type="button" onClick={() => setActiveTab('dashboard')} className="w-full py-5 text-slate-400 font-bold">Cancelar</button>
-                             </form>
-                           </div>
-                        )}
+                    {/* Bottom Nav Mobile */}
+                    <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] p-5 flex justify-around md:hidden z-50 shadow-2xl">
+                        <button onClick={() => {setActiveTab('dashboard'); setSelectedPatientId(null);}} className={`p-2 transition ${activeTab === 'dashboard' ? 'text-emerald-400' : 'text-slate-500'}`}><Icon name="users" size={28}/></button>
+                        <button onClick={() => {setActiveTab('newPatient')}} className="p-3.5 bg-emerald-500 text-white rounded-full -translate-y-10 shadow-2xl shadow-emerald-500/40 border-4 border-[#f8fafc]"><Icon name="plus" size={32}/></button>
+                        <button className="p-2 text-slate-500"><Icon name="line-chart" size={28}/></button>
+                    </nav>
+
+                    <main className="p-4 md:p-16 max-w-7xl mx-auto custom-scrollbar">
+                        {activeTab === 'dashboard' && renderDashboard()}
+                        {activeTab === 'profile' && renderProfile()}
+                        {activeTab === 'newEval' && renderEvaluationForm()}
+                        {activeTab === 'newPatient' && renderNewPatientForm()}
                     </main>
                 </div>
             );
