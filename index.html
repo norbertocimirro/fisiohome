@@ -60,9 +60,10 @@
             border-color: #10b981 !important;
         }
 
-        /* Correção de Layout: Sidebar Desktop */
+        /* Estrutura de Layout */
         .app-container {
             display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
 
@@ -78,12 +79,33 @@
         .main-content {
             flex: 1;
             width: 100%;
+            padding-top: 4rem; /* Espaço para o cabeçalho mobile */
         }
 
         @media (min-width: 768px) {
+            .app-container {
+                flex-direction: row;
+            }
             .main-content {
                 padding-left: 18rem;
+                padding-top: 0; /* No desktop não precisa do padding top do header mobile */
             }
+        }
+
+        /* Cabeçalho superior mobile */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4rem;
+            background: white;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            z-index: 50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
     </style>
 </head>
@@ -97,13 +119,16 @@
             Tooltip, ResponsiveContainer, Legend, AreaChart, Area, BarChart, Bar, Cell
         } = window.Recharts;
 
+        // Ícone helper
         const Icon = ({ name, size = 20, className = "" }) => (
             <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>
         );
 
         const App = () => {
+            // --- CONFIGURAÇÃO GOOGLE SHEETS ---
             const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwraRNSqAc8jCGUXrwTaZv3iuyNfm_z4kW0o_xyWywMoA7pKTtOCVKx-wu5CnUI59cD/exec"; 
 
+            // --- ESTADOS ---
             const [activeTab, setActiveTab] = useState('management'); 
             const [patientFilter, setPatientFilter] = useState('active'); 
             const [selectedPatientId, setSelectedPatientId] = useState(null);
@@ -142,8 +167,10 @@
                 "Incapacidade de Transferência", "Dor ao Movimento", "Espasticidade", "Encurtamento Muscular"
             ];
 
+            // --- EFEITOS ---
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
+            // --- CALCULOS ---
             const stats = useMemo(() => {
                 const active = patients.filter(p => p.status === 'active').length;
                 const archived = patients.filter(p => p.status === 'archived').length;
@@ -163,6 +190,7 @@
             const selectedPatient = useMemo(() => patients.find(p => p.id === selectedPatientId), [patients, selectedPatientId]);
             const calculateBarthel = (b) => Object.values(b).reduce((acc, curr) => acc + parseInt(curr), 0);
 
+            // --- HANDLERS ---
             const handleSaveEvaluation = async (e) => {
                 e.preventDefault();
                 setIsSaving(true);
@@ -213,6 +241,20 @@
 
             return (
                 <div className="app-container">
+                    {/* Cabeçalho Mobile */}
+                    <header className="mobile-header md:hidden">
+                        <div className="bg-emerald-600 p-2 rounded-xl text-white mr-3">
+                            <Icon name="stethoscope" size={20} />
+                        </div>
+                        <h1 className="text-lg font-black text-slate-900 tracking-tighter">
+                            Fisio<span className="text-emerald-600">Home</span> Pro
+                        </h1>
+                        <div className="ml-auto flex items-center gap-2">
+                             <div className={`w-2 h-2 rounded-full ${GOOGLE_SCRIPT_URL ? 'bg-emerald-500' : 'bg-red-400 animate-pulse'}`}></div>
+                             <span className="text-[9px] font-black uppercase text-slate-400">Sheets</span>
+                        </div>
+                    </header>
+
                     {/* Sidebar Desktop */}
                     <aside className="sidebar-desktop bg-white border-r hidden md:flex flex-col p-10 shadow-sm">
                         <div className="flex items-center gap-4 mb-14">
