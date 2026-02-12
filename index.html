@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FisioHome Pro | Gestão e Auditoria</title>
+    <title>FisioHome Pro</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -79,7 +79,9 @@
         .main-content {
             flex: 1;
             width: 100%;
-            padding-top: 4rem; /* Espaço para o cabeçalho mobile */
+            /* Espaço de respiro para o Header e Nav mobile */
+            padding-top: 5rem; 
+            padding-bottom: 8rem;
         }
 
         @media (min-width: 768px) {
@@ -88,24 +90,34 @@
             }
             .main-content {
                 padding-left: 18rem;
-                padding-top: 0; /* No desktop não precisa do padding top do header mobile */
+                padding-top: 2rem; 
+                padding-bottom: 2rem;
             }
         }
 
-        /* Cabeçalho superior mobile */
+        /* Cabeçalho superior mobile exclusivo */
         .mobile-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 4rem;
-            background: white;
+            height: 4.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid #f1f5f9;
             display: flex;
             align-items: center;
             padding: 0 1.5rem;
             z-index: 50;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        /* Botão flutuante para mobile centralizado */
+        .mobile-fab {
+            position: fixed;
+            bottom: 2.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
         }
     </style>
 </head>
@@ -119,13 +131,13 @@
             Tooltip, ResponsiveContainer, Legend, AreaChart, Area, BarChart, Bar, Cell
         } = window.Recharts;
 
-        // Ícone helper
+        // Helper de ícone
         const Icon = ({ name, size = 20, className = "" }) => (
             <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>
         );
 
         const App = () => {
-            // --- CONFIGURAÇÃO GOOGLE SHEETS ---
+            // --- CONFIGURAÇÃO ---
             const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwraRNSqAc8jCGUXrwTaZv3iuyNfm_z4kW0o_xyWywMoA7pKTtOCVKx-wu5CnUI59cD/exec"; 
 
             // --- ESTADOS ---
@@ -176,14 +188,17 @@
                 const archived = patients.filter(p => p.status === 'archived').length;
                 const totalEvals = patients.reduce((acc, p) => acc + p.evaluations.length, 0);
                 const activeWithEval = patients.filter(p => p.status === 'active' && p.evaluations.length > 0);
+                
                 const avgBarthel = activeWithEval.length > 0 
                     ? (activeWithEval.reduce((acc, p) => acc + (p.evaluations.at(-1).barthel || 0), 0) / activeWithEval.length).toFixed(0)
                     : 0;
+
                 const monthlyData = [
                     { mes: 'Jan', ativos: 5, evals: 12 },
                     { mes: 'Fev', ativos: 8, evals: 18 },
                     { mes: 'Mar', ativos: active, evals: totalEvals }
                 ];
+
                 return { active, archived, totalEvals, avgBarthel, monthlyData };
             }, [patients]);
 
@@ -195,19 +210,28 @@
                 e.preventDefault();
                 setIsSaving(true);
                 const score = calculateBarthel(newEval.barthel);
+                
                 const evaluationData = {
                     ...newEval,
                     barthelScore: score,
                     patientName: selectedPatient.name,
                     clinicalDiagnosis: selectedPatient.clinicalDiagnosis
                 };
+
                 const updated = patients.map(p => p.id === selectedPatientId ? { ...p, evaluations: [...p.evaluations, { ...newEval, barthel: score }] } : p);
+                
                 try {
                     if (GOOGLE_SCRIPT_URL) {
-                        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(evaluationData) });
+                        await fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(evaluationData)
+                        });
                     }
                     setPatients(updated);
                     setActiveTab('profile');
+                    // Reset
                     setNewEval({
                         date: new Date().toLocaleDateString('pt-BR'),
                         sys: '', dia: '', weight: '', echo: '',
@@ -215,7 +239,6 @@
                         sts: '', functionalChecks: [], notes: ''
                     });
                 } catch (error) {
-                    console.error("Erro ao sincronizar:", error);
                     setPatients(updated);
                     setActiveTab('profile');
                 } finally {
@@ -241,21 +264,21 @@
 
             return (
                 <div className="app-container">
-                    {/* Cabeçalho Mobile */}
+                    {/* Cabeçalho Superior Mobile (Sempre visível no celular) */}
                     <header className="mobile-header md:hidden">
-                        <div className="bg-emerald-600 p-2 rounded-xl text-white mr-3">
+                        <div className="bg-emerald-600 p-2 rounded-xl text-white mr-3 shadow-lg shadow-emerald-100">
                             <Icon name="stethoscope" size={20} />
                         </div>
                         <h1 className="text-lg font-black text-slate-900 tracking-tighter">
                             Fisio<span className="text-emerald-600">Home</span> Pro
                         </h1>
-                        <div className="ml-auto flex items-center gap-2">
-                             <div className={`w-2 h-2 rounded-full ${GOOGLE_SCRIPT_URL ? 'bg-emerald-500' : 'bg-red-400 animate-pulse'}`}></div>
-                             <span className="text-[9px] font-black uppercase text-slate-400">Sheets</span>
+                        <div className="ml-auto flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                             <div className={`w-2 h-2 rounded-full ${GOOGLE_SCRIPT_URL ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`}></div>
+                             <span className="text-[9px] font-black uppercase text-slate-500">Cloud Sync</span>
                         </div>
                     </header>
 
-                    {/* Sidebar Desktop */}
+                    {/* Sidebar Desktop (Escondida no celular) */}
                     <aside className="sidebar-desktop bg-white border-r hidden md:flex flex-col p-10 shadow-sm">
                         <div className="flex items-center gap-4 mb-14">
                             <div className="bg-emerald-600 p-3.5 rounded-2xl text-white shadow-xl shadow-emerald-100"><Icon name="stethoscope" size={28} /></div>
@@ -273,36 +296,36 @@
                             </button>
                         </nav>
                         <div className="mt-auto p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-black">FP</div>
-                                <div className="leading-tight">
-                                    <p className="text-xs font-black text-slate-800">Dr. Wagner da Silva Naue</p>
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold">Fisioterapeuta</p>
-                                </div>
-                             </div>
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status do Sistema</p>
                              <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${GOOGLE_SCRIPT_URL ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`}></span>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Google Sheets Sync</span>
+                                <span className="text-[10px] font-bold text-slate-600 uppercase">Sheets Integrado</span>
                              </div>
                         </div>
                     </aside>
 
-                    {/* Mobile Footer Navigation */}
-                    <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] bg-slate-900/95 backdrop-blur-2xl rounded-[3rem] p-5 flex justify-around md:hidden z-50 shadow-2xl">
-                        <button onClick={() => setActiveTab('management')} className={`p-2 transition ${activeTab === 'management' ? 'text-emerald-400' : 'text-slate-500'}`}><Icon name="layout-dashboard" size={28}/></button>
-                        <button onClick={() => setActiveTab('patients')} className={`p-2 transition ${activeTab === 'patients' ? 'text-emerald-400' : 'text-slate-500'}`}><Icon name="users" size={28}/></button>
-                        <button onClick={() => setActiveTab('newPatient')} className="p-3.5 bg-emerald-500 text-white rounded-full -translate-y-12 shadow-2xl border-4 border-[#f8fafc]"><Icon name="plus" size={32}/></button>
-                        <button className="p-2 text-slate-500 opacity-30"><Icon name="calendar" size={28}/></button>
+                    {/* Botão FAB Mobile (Centralizado) */}
+                    <div className="mobile-fab md:hidden">
+                        <button onClick={() => setActiveTab('newPatient')} className="bg-emerald-500 text-white p-4 rounded-full shadow-2xl border-4 border-white active:scale-90 transition-transform">
+                            <Icon name="plus" size={32}/>
+                        </button>
+                    </div>
+
+                    {/* Navbar Inferior Mobile */}
+                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[85%] bg-slate-900/95 backdrop-blur-2xl rounded-[3rem] p-4 flex justify-between md:hidden z-50 shadow-2xl px-10">
+                        <button onClick={() => setActiveTab('management')} className={`p-2 transition ${activeTab === 'management' ? 'text-emerald-400' : 'text-slate-500'}`}><Icon name="layout-dashboard" size={26}/></button>
+                        <button onClick={() => setActiveTab('patients')} className={`p-2 transition ${activeTab === 'patients' ? 'text-emerald-400' : 'text-slate-500'}`}><Icon name="users" size={26}/></button>
                     </nav>
 
-                    {/* Conteúdo Principal */}
+                    {/* Conteúdo Principal com Respiro de Segurança */}
                     <main className="main-content">
-                        <div className="p-6 md:p-16 max-w-7xl mx-auto">
+                        <div className="p-6 md:p-12 max-w-7xl mx-auto">
+                            
                             {activeTab === 'management' && (
                                 <div className="space-y-8 fade-in">
                                     <header>
                                         <h2 className="text-3xl font-black text-slate-900 tracking-tight text-center md:text-left">Gestão Clínica</h2>
-                                        <p className="text-slate-500 font-medium text-center md:text-left italic">Indicadores de produtividade e evolução</p>
+                                        <p className="text-slate-500 font-medium text-center md:text-left italic">Visão geral do seu consultório</p>
                                     </header>
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -313,7 +336,7 @@
                                                 <h4 className="text-4xl font-black text-slate-900 leading-none mt-1">{stats.active}</h4>
                                             </div>
                                         </div>
-                                        <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between h-40">
+                                        <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between h-40 border-l-4 border-l-emerald-500">
                                             <Icon name="trending-up" className="text-emerald-500" />
                                             <div>
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Média Barthel</p>
@@ -323,14 +346,14 @@
                                         <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between h-40">
                                             <Icon name="archive" className="text-slate-400" />
                                             <div>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arquivados</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Altas / Arquivo</p>
                                                 <h4 className="text-4xl font-black text-slate-900 leading-none mt-1">{stats.archived}</h4>
                                             </div>
                                         </div>
                                         <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between h-40">
                                             <Icon name="clipboard-check" className="text-purple-500" />
                                             <div>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avaliações</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Avaliações</p>
                                                 <h4 className="text-4xl font-black text-slate-900 leading-none mt-1">{stats.totalEvals}</h4>
                                             </div>
                                         </div>
@@ -339,7 +362,7 @@
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                         <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
                                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8 flex items-center gap-2">
-                                                <Icon name="bar-chart-2" size={16} className="text-emerald-500" /> Fluxo de Atendimentos
+                                                <Icon name="bar-chart-2" size={16} className="text-emerald-500" /> Fluxo Mensal
                                             </h3>
                                             <div className="h-64 w-full">
                                                 <ResponsiveContainer width="100%" height="100%">
@@ -358,7 +381,7 @@
                                             </div>
                                         </div>
                                         <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
-                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8">Estatística de Diagnóstico</h3>
+                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8">Diagnósticos Principais</h3>
                                             <div className="space-y-4">
                                                 {Array.from(new Set(patients.map(p => p.clinicalDiagnosis))).map((diag, i) => {
                                                     const count = patients.filter(p => p.clinicalDiagnosis === diag).length;
@@ -385,21 +408,18 @@
                                 <div className="space-y-6 fade-in">
                                     <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div>
-                                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Prontuários</h2>
+                                            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pacientes</h2>
                                             <div className="flex gap-4 mt-2">
                                                 <button onClick={() => setPatientFilter('active')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${patientFilter === 'active' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-slate-300'}`}>Ativos ({stats.active})</button>
                                                 <button onClick={() => setPatientFilter('archived')} className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${patientFilter === 'archived' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-slate-300'}`}>Arquivo ({stats.archived})</button>
                                             </div>
                                         </div>
-                                        <button onClick={() => setActiveTab('newPatient')} className="bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all font-black text-xs uppercase">
-                                            <Icon name="user-plus" size={16}/> NOVO PACIENTE
-                                        </button>
                                     </header>
 
-                                    <div className="relative">
-                                        <Icon name="search" size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" />
+                                    <div className="relative group">
+                                        <Icon name="search" size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
                                         <input 
-                                            type="text" placeholder="Procurar paciente..." 
+                                            type="text" placeholder="Procurar por nome ou diagnóstico..." 
                                             className="w-full pl-14 pr-6 py-5 rounded-[2rem] border-none shadow-sm bg-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-slate-700"
                                             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -407,15 +427,15 @@
 
                                     <div className="grid gap-4">
                                         {patients.filter(p => p.status === patientFilter && p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(p => (
-                                            <div key={p.id} className="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-50 flex items-center justify-between hover:shadow-md transition-all cursor-pointer group" onClick={() => { setSelectedPatientId(p.id); setActiveTab('profile'); }}>
+                                            <div key={p.id} className="bg-white p-5 rounded-[2.5rem] shadow-sm border border-slate-50 flex items-center justify-between hover:shadow-md transition-all cursor-pointer group active:scale-[0.99]" onClick={() => { setSelectedPatientId(p.id); setActiveTab('profile'); }}>
                                                 <div className="flex items-center gap-5">
                                                     <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center font-black text-2xl ${p.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>{p.name[0]}</div>
                                                     <div>
                                                         <h3 className="font-bold text-slate-800 text-lg leading-tight">{p.name}</h3>
-                                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{p.clinicalDiagnosis}</p>
+                                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">{p.clinicalDiagnosis}</p>
                                                     </div>
                                                 </div>
-                                                <Icon name="chevron-right" className="text-slate-200 group-hover:text-emerald-500" />
+                                                <Icon name="chevron-right" className="text-slate-200 group-hover:text-emerald-500 transition-transform" />
                                             </div>
                                         ))}
                                     </div>
@@ -425,28 +445,28 @@
                             {activeTab === 'profile' && selectedPatient && (
                                 <div className="space-y-6 fade-in">
                                     <div className="flex items-center justify-between">
-                                        <button onClick={() => setActiveTab('patients')} className="p-4 bg-white rounded-2xl shadow-sm text-slate-500 hover:text-emerald-600 transition-all"><Icon name="arrow-left" size={24} /></button>
+                                        <button onClick={() => setActiveTab('patients')} className="p-4 bg-white rounded-2xl shadow-sm text-slate-500"><Icon name="arrow-left" size={24} /></button>
                                         <button onClick={() => toggleArchivePatient(selectedPatient.id)} className={`px-6 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${selectedPatient.status === 'active' ? 'bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500' : 'bg-emerald-100 text-emerald-600'}`}>
-                                            {selectedPatient.status === 'active' ? 'Dar Alta / Arquivar' : 'Reativar Atendimento'}
+                                            {selectedPatient.status === 'active' ? 'Arquivar Paciente' : 'Reativar'}
                                         </button>
                                     </div>
                                     
                                     <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
-                                        <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
-                                            <div className="space-y-3">
+                                        <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 text-center md:text-left">
+                                            <div className="space-y-3 w-full md:w-auto">
                                                 <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none">{selectedPatient.name}</h2>
-                                                <p className="text-slate-400 font-bold uppercase text-xs">{selectedPatient.clinicalDiagnosis} • {selectedPatient.age} ANOS</p>
+                                                <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">{selectedPatient.clinicalDiagnosis} • {selectedPatient.age} ANOS</p>
                                             </div>
                                             {selectedPatient.status === 'active' && (
                                                 <button onClick={() => setActiveTab('newEval')} className="w-full md:w-auto bg-slate-900 text-white px-10 py-6 rounded-[1.8rem] flex items-center justify-center gap-3 font-black shadow-2xl transition-all active:scale-95">
-                                                    <Icon name="activity" size={22} /> REAVALIAR AGORA
+                                                    <Icon name="activity" size={22} /> AVALIAR CICLO
                                                 </button>
                                             )}
                                         </div>
 
                                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                             <div className="lg:col-span-2 space-y-5">
-                                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Icon name="trending-up" size={16} className="text-emerald-500" /> Evolução Funcional</h3>
+                                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Icon name="trending-up" size={16} className="text-emerald-500" /> Curva de Evolução</h3>
                                                 <div className="h-80 w-full bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
                                                     {selectedPatient.evaluations.length > 1 ? (
                                                         <ResponsiveContainer width="100%" height="100%">
@@ -463,14 +483,14 @@
                                                     ) : (
                                                         <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4">
                                                             <Icon name="bar-chart-3" size={48} className="opacity-20" />
-                                                            <p className="text-sm font-bold opacity-60 text-center">Gráfico disponível após<br/>2 avaliações</p>
+                                                            <p className="text-sm font-bold opacity-60 text-center uppercase tracking-widest">Necessário 2 avaliações</p>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                             <div className="space-y-6">
                                                 <div className="bg-emerald-600 text-white p-10 rounded-[3rem] shadow-2xl flex flex-col justify-center text-center h-full">
-                                                    <p className="text-[11px] font-black opacity-60 uppercase mb-4 tracking-widest text-center">Barthel Atual</p>
+                                                    <p className="text-[11px] font-black opacity-60 uppercase mb-4 tracking-widest">Barthel Atual</p>
                                                     <div className="flex items-baseline justify-center gap-2">
                                                         <h4 className="text-8xl font-black">{selectedPatient.evaluations.length > 0 ? selectedPatient.evaluations.at(-1).barthel : '00'}</h4>
                                                         <span className="text-xl opacity-60 font-bold">/100</span>
@@ -483,9 +503,9 @@
                             )}
 
                             {activeTab === 'newEval' && selectedPatient && (
-                                <div className="max-w-4xl mx-auto space-y-8 pb-32 fade-in">
+                                <div className="max-w-4xl mx-auto space-y-8 fade-in">
                                     <header className="flex items-center gap-5 bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-50">
-                                        <button onClick={() => setActiveTab('profile')} className="p-3 bg-slate-50 rounded-2xl text-slate-500 hover:text-emerald-600 transition-all"><Icon name="arrow-left" size={24} /></button>
+                                        <button onClick={() => setActiveTab('profile')} className="p-3 bg-slate-50 rounded-2xl text-slate-500"><Icon name="arrow-left" size={24} /></button>
                                         <div>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avaliar Paciente</p>
                                             <h2 className="text-xl font-black text-slate-800">{selectedPatient.name}</h2>
@@ -494,13 +514,11 @@
 
                                     <form onSubmit={handleSaveEvaluation} className="space-y-8">
                                         <section className="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-                                            <h3 className="font-black text-slate-800 mb-10 border-b border-slate-50 pb-6 flex items-center gap-3 text-xs uppercase tracking-widest">
-                                                <Icon name="stethoscope" className="text-emerald-500"/> Sinais Vitais e Biometria
-                                            </h3>
+                                            <h3 className="font-black text-slate-800 mb-10 border-b border-slate-50 pb-6 flex items-center gap-3 text-xs uppercase tracking-widest"><Icon name="stethoscope" className="text-emerald-500"/> Sinais Vitais</h3>
                                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                                                 {[
-                                                    {id:'sys',l:'PA Sistólica',p:'120'}, {id:'dia',l:'PA Diastólica',p:'80'}, 
-                                                    {id:'weight',l:'Peso (kg)',p:'75.0'}, {id:'echo',l:'ECO Músculo',p:'1.2'}
+                                                    {id:'sys',l:'PA Sis.',p:'120'}, {id:'dia',l:'PA Dia.',p:'80'}, 
+                                                    {id:'weight',l:'Peso (kg)',p:'75.0'}, {id:'echo',l:'ECO (cm)',p:'1.2'}
                                                 ].map(f => (
                                                     <div key={f.id} className="space-y-2">
                                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.l}</label>
@@ -513,7 +531,7 @@
                                                 ))}
                                             </div>
                                             <div className="mt-10">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Teste Senta e Levanta (30 seg)</label>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">STS (Senta e Levanta)</label>
                                                 <input 
                                                     type="number" className="w-full p-8 bg-slate-50 border-none rounded-[2rem] outline-none font-black text-5xl text-emerald-600 focus:ring-2 focus:ring-emerald-500 text-center" 
                                                     value={newEval.sts} onChange={e => setNewEval({...newEval, sts: e.target.value})} 
@@ -562,7 +580,7 @@
                                                 ))}
                                             </div>
                                             <textarea 
-                                                placeholder="Notas de evolução e conduta..."
+                                                placeholder="Notas de conduta e evolução..."
                                                 className="w-full mt-12 p-8 bg-slate-50 border-none rounded-[2.5rem] h-56 text-sm outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700"
                                                 value={newEval.notes} onChange={e => setNewEval({...newEval, notes: e.target.value})}
                                             />
@@ -570,7 +588,7 @@
 
                                         <button type="submit" disabled={isSaving} className={`w-full py-10 rounded-[2.5rem] font-black text-2xl shadow-2xl transition-all flex items-center justify-center gap-4 ${isSaving ? 'bg-slate-400' : 'bg-slate-900 hover:bg-black text-white active:scale-95'}`}>
                                             {isSaving ? <Icon name="loader" className="animate-spin" /> : <Icon name="save" size={32} />}
-                                            {isSaving ? "PROCESSANDO..." : "FINALIZAR E ENVIAR PLANILHA"}
+                                            {isSaving ? "PROCESSANDO..." : "FINALIZAR E SALVAR"}
                                         </button>
                                     </form>
                                 </div>
@@ -581,19 +599,19 @@
                                     <h2 className="text-4xl font-black text-slate-900 mb-10 tracking-tight leading-none text-center">Novo Cadastro</h2>
                                     <form onSubmit={(e) => { e.preventDefault(); setPatients([...patients, {...newPatient, id: Date.now(), status: 'active', evaluations: [], createdAt: new Date().toISOString().split('T')[0]}]); setActiveTab('patients'); setNewPatient({ name: '', age: '', clinicalDiagnosis: '' }); }} className="space-y-8">
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3">Nome Completo</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3 text-center block w-full">Nome do Paciente</label>
                                             <input required placeholder="Ex: Francisco Santos" className="w-full p-6 bg-slate-50 border-none rounded-[1.8rem] outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})} />
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3">Diagnóstico / CID</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3 text-center block w-full">Diagnóstico Clínico</label>
                                             <input required placeholder="Ex: Parkinson" className="w-full p-6 bg-slate-50 border-none rounded-[1.8rem] outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.clinicalDiagnosis} onChange={e => setNewPatient({...newPatient, clinicalDiagnosis: e.target.value})} />
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3">Idade</label>
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3 text-center block w-full">Idade</label>
                                             <input type="number" placeholder="Ex: 72" className="w-full p-6 bg-slate-50 border-none rounded-[1.8rem] outline-none font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500" value={newPatient.age} onChange={e => setNewPatient({...newPatient, age: e.target.value})} />
                                         </div>
                                         <div className="pt-6 flex flex-col gap-4">
-                                            <button type="submit" className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black shadow-xl shadow-emerald-50 hover:bg-emerald-700 transition-all uppercase tracking-widest text-xs">CADASTRAR E ABRIR PRONTUÁRIO</button>
+                                            <button type="submit" className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black shadow-xl uppercase tracking-widest text-xs">CADASTRAR E ABRIR PRONTUÁRIO</button>
                                             <button type="button" onClick={() => setActiveTab('patients')} className="w-full py-4 text-slate-400 font-bold uppercase tracking-widest text-xs hover:text-slate-600">CANCELAR</button>
                                         </div>
                                     </form>
