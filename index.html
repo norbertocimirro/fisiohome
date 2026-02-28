@@ -5,27 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FisioHome Pro | HealthTech</title>
     
-    <!-- Meta Tags PWA iOS/Android (App Nativo) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#f8fafc">
     
-    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM (Crossorigin previne bloqueios de segurança no Vercel) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js" crossorigin></script>
-    
-    <!-- Recharts -->
     <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest" crossorigin></script>
-    
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
 
     <style>
@@ -43,118 +33,71 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none; /* Evita o "bounce" ao rolar no iOS */
+            overscroll-behavior-y: none;
         }
 
-        /* Oculta scrollbar mas mantém a rolagem suave */
         ::-webkit-scrollbar { display: none; }
         * { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Otimização de Inputs - Previne Zoom em iPhones */
-        input, button, textarea { 
-            outline: none !important; 
-            appearance: none; 
-            font-size: 16px !important; 
-        }
+        input, button, textarea { outline: none !important; appearance: none; font-size: 16px !important; }
         
-        .premium-shadow {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.02);
-        }
-        
-        .premium-shadow-hover {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0,0,0,0.03);
+        .premium-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.02); }
+        .card-premium {
+            background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 0 3px rgba(0,0,0,0.02);
+            border-radius: 2rem; transition: all 0.3s ease;
         }
 
-        .input-soft {
-            background-color: #f1f5f9;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .input-soft:focus {
-            background-color: #ffffff;
-            border-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-        }
+        .input-soft { background-color: #f1f5f9; border: 2px solid transparent; transition: all 0.3s ease; }
+        .input-soft:focus { background-color: #ffffff; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
 
-        /* Animações Flúidas */
         .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Estilos do Sistema */
         .barthel-btn-active {
-            background-color: #10b981 !important;
-            color: white !important;
+            background-color: #10b981 !important; color: white !important;
             box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.5);
-            transform: scale(1.08);
-            border-color: #10b981 !important;
+            transform: scale(1.05); border-color: #10b981 !important;
         }
-
-        /* Switch LGPD */
-        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
-
-        /* Layout Responsivo Masterpiece */
-        .app-layout { display: flex; min-height: 100vh; flex-direction: column; }
         
-        /* Mobile First Layout */
+        .font-digital { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+        .app-layout { display: flex; min-height: 100vh; flex-direction: column; }
         .desktop-sidebar { display: none; }
-        .mobile-content { 
-            flex: 1; 
-            width: 100%; 
-            padding-top: calc(5.5rem + var(--safe-area-pt)); 
-            padding-bottom: calc(8rem + var(--safe-area-pb)); 
-        }
+        .mobile-content { flex: 1; width: 100%; padding-top: calc(5.5rem + var(--safe-area-pt)); padding-bottom: calc(8rem + var(--safe-area-pb)); }
 
         .mobile-header {
             position: fixed; top: 0; left: 0; right: 0; height: 5rem;
             background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.6); 
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 1.5rem; z-index: 50;
-            padding-top: var(--safe-area-pt);
+            padding: 0 1.5rem; z-index: 50; padding-top: var(--safe-area-pt);
         }
 
-        /* Dynamic Island Flutuante no Mobile */
         .floating-nav {
-            position: fixed; bottom: calc(1.5rem + var(--safe-area-pb)); 
-            left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: calc(1.5rem + var(--safe-area-pb)); left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px;
             background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-radius: 3rem; padding: 0.75rem 1.5rem;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
-            z-index: 50;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); z-index: 50;
         }
 
         .fab-center {
             background: linear-gradient(135deg, #10b981, #059669);
-            transform: translateY(-40%);
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5);
-            border: 4px solid var(--bg-app);
+            transform: translateY(-40%); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5);
+            border: 4px solid #f8fafc;
         }
 
-        /* Desktop Layout (Telas Grandes) */
         @media (min-width: 1024px) {
             .app-layout { flex-direction: row; }
-            .desktop-sidebar { 
-                display: flex; flex-direction: column; width: 320px; 
-                position: fixed; top: 0; bottom: 0; left: 0;
-                background: #ffffff; border-right: 1px solid #f1f5f9; z-index: 40;
-            }
-            .mobile-content { 
-                margin-left: 320px; 
-                padding-top: 3rem; 
-                padding-bottom: 3rem; 
-            }
+            .desktop-sidebar { display: flex; flex-direction: column; width: 320px; position: fixed; top: 0; bottom: 0; left: 0; background: #ffffff; border-right: 1px solid #f1f5f9; z-index: 40; }
+            .mobile-content { margin-left: 320px; padding-top: 3rem; padding-bottom: 3rem; }
             .mobile-only { display: none !important; }
         }
 
-        /* Toast Notifications */
         .toast-enter { animation: toastEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes toastEnter { from { opacity: 0; transform: translateY(-20px) translateX(-50%); } to { opacity: 1; transform: translateY(0) translateX(-50%); } }
     </style>
@@ -163,92 +106,208 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useCallback } = React;
-        const { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, Legend } = window.Recharts;
+        const { useState, useEffect, useMemo, useRef } = React;
+        const { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } = window.Recharts;
 
-        // Componentes Puros e Estáveis (Declarados fora do App para evitar recriação de DOM)
         const Icon = ({ name, size = 20, className = "", strokeWidth = 2 }) => {
-            const iconRef = React.useRef(null);
+            const spanRef = useRef(null);
             useEffect(() => {
-                if (window.lucide && iconRef.current) {
-                    window.lucide.createIcons({
-                        attrs: { 'stroke-width': strokeWidth },
-                        nameAttr: 'data-lucide'
-                    });
+                if (spanRef.current && window.lucide) {
+                    spanRef.current.innerHTML = `<i data-lucide="${name}" class="${className}" style="width:${size}px; height:${size}px; stroke-width:${strokeWidth}"></i>`;
+                    window.lucide.createIcons({ root: spanRef.current });
                 }
-            });
-            return <i ref={iconRef} data-lucide={name} style={{ width: size, height: size }} className={`inline-block ${className}`}></i>;
+            }, [name, size, className, strokeWidth]);
+            return <span ref={spanRef} className="inline-flex items-center justify-center" style={{ width: size, height: size }}></span>;
         };
 
-        const Card = ({ children, className = "" }) => (
-            <div className={`bg-white rounded-[2rem] p-6 lg:p-8 premium-shadow border border-slate-100/50 ${className}`}>{children}</div>
-        );
+        // --- COMPONENTES SMART CLINICAL TOOLS (Blindados contra loops) --- //
+        
+        const SmartTUGTimer = ({ value, onChange }) => {
+            const [time, setTime] = useState(parseFloat(value) || 0);
+            const [isRunning, setIsRunning] = useState(false);
 
-        const MetricItem = ({ label, value, unit = "", highlight = false }) => (
-            <div className="flex flex-col">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">{label}</p>
-                <p className={`text-2xl font-black ${highlight ? 'text-emerald-500' : 'text-slate-800'}`}>
-                    {value} {unit && <span className="text-sm font-bold text-slate-400">{unit}</span>}
-                </p>
-            </div>
-        );
+            useEffect(() => {
+                let interval;
+                if (isRunning) {
+                    interval = setInterval(() => setTime(t => t + 0.1), 100);
+                }
+                return () => clearInterval(interval);
+            }, [isRunning]);
+
+            const handleToggle = () => {
+                if (isRunning) {
+                    setIsRunning(false);
+                    onChange(time.toFixed(1)); // Dispara apenas no clique
+                } else {
+                    setIsRunning(true);
+                }
+            };
+
+            const handleReset = () => {
+                setIsRunning(false);
+                setTime(0);
+                onChange('');
+            };
+
+            const getInterpretation = (sec) => {
+                if (!sec || sec <= 0) return null;
+                if (sec <= 10) return { l: 'Baixo Risco', c: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+                if (sec <= 20) return { l: 'Risco Moderado', c: 'bg-amber-100 text-amber-700 border-amber-200' };
+                return { l: 'Alto Risco (Quedas)', c: 'bg-red-100 text-red-700 border-red-200' };
+            };
+            
+            const interp = getInterpretation(time);
+
+            return (
+                <div className="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100 flex flex-col items-center relative overflow-hidden">
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">TUG Test Integrado</p>
+                    <div className="text-5xl font-digital font-black text-blue-600 tracking-tighter mb-2">
+                        {time.toFixed(1)}<span className="text-xl text-blue-400">s</span>
+                    </div>
+                    <div className="h-6 mb-4 flex items-center justify-center">
+                        {interp && (
+                            <span className={`px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${interp.c}`}>
+                                {interp.l}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex gap-3 w-full relative z-10">
+                        <button type="button" onClick={handleToggle} className={`flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-md active:scale-95 ${isRunning ? 'bg-red-500 text-white shadow-red-500/30' : 'bg-blue-600 text-white shadow-blue-600/30'}`}>
+                            {isRunning ? 'PARAR' : 'INICIAR'}
+                        </button>
+                        <button type="button" onClick={handleReset} className="px-5 bg-white border border-blue-200 text-blue-500 rounded-2xl active:scale-95">
+                            <Icon name="rotate-ccw" size={20} />
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const SmartSTSCounter = ({ value, onChange }) => {
+            const [reps, setReps] = useState(parseInt(value) || 0);
+            const [timeLeft, setTimeLeft] = useState(30);
+            const [isRunning, setIsRunning] = useState(false);
+
+            useEffect(() => {
+                let interval;
+                if (isRunning && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                } else if (timeLeft === 0 && isRunning) {
+                    setIsRunning(false);
+                }
+                return () => clearInterval(interval);
+            }, [isRunning, timeLeft]);
+
+            const updateReps = (delta) => {
+                const newVal = Math.max(0, reps + delta);
+                setReps(newVal);
+                onChange(newVal); // Atualiza form seguro
+            };
+
+            const getInterpretation = (r) => {
+                if (r === 0 && timeLeft === 30) return null;
+                if (r < 8) return { l: 'Força Reduzida', c: 'bg-red-100 text-red-700 border-red-200' };
+                if (r <= 11) return { l: 'Abaixo da Média', c: 'bg-amber-100 text-amber-700 border-amber-200' };
+                return { l: 'Força Adequada', c: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+            };
+            const interp = getInterpretation(reps);
+
+            return (
+                <div className="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100 flex flex-col items-center">
+                    <div className="flex justify-between w-full items-center mb-2">
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">STS (Senta/Levanta)</p>
+                        <div className={`px-3 py-1 rounded-full font-digital font-black text-sm flex items-center gap-1.5 ${isRunning ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-emerald-100 text-emerald-700'}`}>
+                            <Icon name="timer" size={12}/> {timeLeft}s
+                        </div>
+                    </div>
+                    <div className="h-6 mb-3 w-full flex items-center justify-start">
+                        {interp && (
+                            <span className={`px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${interp.c}`}>
+                                {interp.l}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center justify-between w-full mb-4">
+                        <button type="button" onClick={() => updateReps(-1)} className="w-14 h-14 bg-white border border-emerald-200 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm active:scale-90"><Icon name="minus" size={24}/></button>
+                        <div className="text-5xl font-digital font-black text-emerald-600 tracking-tighter">
+                            {reps}<span className="text-xl text-emerald-400">x</span>
+                        </div>
+                        <button type="button" onClick={() => updateReps(1)} className="w-14 h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 active:scale-90"><Icon name="plus" size={24}/></button>
+                    </div>
+                    {!isRunning && timeLeft === 30 ? (
+                        <button type="button" onClick={() => { setIsRunning(true); setReps(0); }} className="w-full py-3.5 bg-emerald-100 text-emerald-700 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 border border-emerald-200">Iniciar Relógio (30s)</button>
+                    ) : (
+                        <button type="button" onClick={() => { setIsRunning(false); setTimeLeft(30); }} className="w-full py-3.5 bg-white border border-slate-200 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95">Resetar Teste</button>
+                    )}
+                </div>
+            );
+        };
 
         const App = () => {
-            // --- CONFIGURAÇÃO CLOUD ---
             const GOOGLE_SCRIPT_URL = ""; 
 
-            // --- ESTADOS GLOBAIS E AUTENTICAÇÃO ---
             const [isAuthenticated, setIsAuthenticated] = useState(false);
             const [authView, setAuthView] = useState('login'); 
             const [credentials, setCredentials] = useState({ user: 'wagner', pass: '123456', displayName: 'Dr. Wagner Naue' });
             const [loginInput, setLoginInput] = useState({ user: '', pass: '' });
             const [passInput, setPassInput] = useState({ old: '', new: '', confirm: '' });
             
-            // --- ESTADOS DO SISTEMA ---
-            const [activeView, setActiveView] = useState('dashboard'); 
+            const [activeView, setActiveView] = useState('management'); 
             const [patientFilter, setPatientFilter] = useState('active'); 
             const [selectedPatientId, setSelectedPatientId] = useState(null);
             const [searchQuery, setSearchQuery] = useState('');
             const [isLoading, setIsLoading] = useState(false);
             const [toast, setToast] = useState(null);
 
-            const showToast = (message, type = 'success') => {
-                setToast({ message, type });
-                setTimeout(() => setToast(null), 3500);
+            const initialEvalState = {
+                sys: '', dia: '', weight: '', echo: '', tug: '', sts: '',
+                barthel: { alimentacao: 0, banho: 0, higiene: 0, vestir: 0, intestino: 0, bexiga: 0, banheiro: 0, transferencia: 0, mobilidade: 0, escadas: 0 },
+                functionalChecks: [], notes: ''
             };
 
-            // MOCK DATA (Dados do Dr. Wagner)
+            const [evalForm, setEvalForm] = useState(initialEvalState);
+            const [newPatientForm, setNewPatientForm] = useState({ name: '', age: '', clinicalDiagnosis: '', lgpdConsent: false });
+
             const [patients, setPatients] = useState([
                 { 
                     id: 1, name: 'Wilson Ferreira', age: 78, clinicalDiagnosis: 'Pós-AVC Isquêmico', status: 'active', lgpdConsent: true,
                     evaluations: [
                         { date: '01/03', barthel: 45, sts: '8', tug: '18.5', sys: '140', dia: '90', weight: '75', echo: '1.2', functionalChecks: ['Redução de Força', 'Marcha Alterada'], notes: 'Início do tratamento domiciliar.' },
-                        { date: '01/04', barthel: 65, sts: '12', tug: '14.2', sys: '135', dia: '85', weight: '74', echo: '1.4', functionalChecks: ['Redução de Força'], notes: 'Evolução favorável, ganho de autonomia nas transferências.' }
+                        { date: '01/04', barthel: 65, sts: '12', tug: '14.2', sys: '135', dia: '85', weight: '74', echo: '1.4', functionalChecks: ['Redução de Força'], notes: 'Evolução favorável nas transferências.' }
                     ]
                 },
                 { 
                     id: 2, name: 'Maria de Lurdes', age: 82, clinicalDiagnosis: 'Alzheimer / Fratura Fêmur', status: 'active', lgpdConsent: true,
-                    evaluations: [{ date: '15/02', barthel: 20, sts: '2', tug: '35.0', sys: '120', dia: '80', weight: '60', echo: '0.9', functionalChecks: ['Incapacidade de Transferência'], notes: 'Paciente acamada. Risco de queda alto.' }]
+                    evaluations: [{ date: '15/02', barthel: 20, sts: '2', tug: '35.0', sys: '120', dia: '80', weight: '60', echo: '0.9', functionalChecks: ['Incapacidade de Transferência'], notes: 'Paciente restrita ao leito.' }]
                 }
             ]);
 
-            const [evalForm, setEvalForm] = useState({
-                sys: '', dia: '', weight: '', echo: '', tug: '', sts: '',
-                barthel: { alimentacao: 0, banho: 0, higiene: 0, vestir: 0, intestino: 0, bexiga: 0, banheiro: 0, transferencia: 0, mobilidade: 0, escadas: 0 },
-                functionalChecks: [], notes: ''
-            });
-
-            const [newPatientForm, setNewPatientForm] = useState({ name: '', age: '', clinicalDiagnosis: '', lgpdConsent: false });
-
-            const checklistOptions = [
-                "Redução de Força Muscular", "Redução de ADM", "Déficit de Equilíbrio",
-                "Alteração de Sensibilidade", "Marcha Alterada", "Incapacidade de Transferência", 
-                "Dor ao Movimento", "Espasticidade", "Encurtamento Muscular"
+            const barthelItems = [
+                {id:'alimentacao', l:'Alimentação', o:[{v:0, t:'Dep.'}, {v:5, t:'Ajuda'}, {v:10, t:'Indep.'}]},
+                {id:'banho', l:'Banho', o:[{v:0, t:'Dep.'}, {v:5, t:'Indep.'}]},
+                {id:'higiene', l:'Higiene Pessoal', o:[{v:0, t:'Dep.'}, {v:5, t:'Indep.'}]},
+                {id:'vestir', l:'Vestir-se', o:[{v:0, t:'Dep.'}, {v:5, t:'Ajuda'}, {v:10, t:'Indep.'}]},
+                {id:'intestino', l:'Intestino', o:[{v:0, t:'Incont.'}, {v:5, t:'Acidente'}, {v:10, t:'Cont.'}]},
+                {id:'bexiga', l:'Bexiga', o:[{v:0, t:'Incont.'}, {v:5, t:'Acidente'}, {v:10, t:'Cont.'}]},
+                {id:'banheiro', l:'Uso Banheiro', o:[{v:0, t:'Dep.'}, {v:5, t:'Ajuda'}, {v:10, t:'Indep.'}]},
+                {id:'transferencia', l:'Transferência (Cama-Cad)', o:[{v:0, t:'Dep.'}, {v:5, t:'Muita Aj.'}, {v:10, t:'Pouca Aj.'}, {v:15, t:'Indep.'}]},
+                {id:'mobilidade', l:'Mobilidade', o:[{v:0, t:'Imóvel'}, {v:5, t:'Cadeira'}, {v:10, t:'Acompanhado'}, {v:15, t:'Indep.'}]},
+                {id:'escadas', l:'Escadas', o:[{v:0, t:'Dep.'}, {v:5, t:'Ajuda'}, {v:10, t:'Indep.'}]}
             ];
 
-            // --- LÓGICA CLÍNICA E ESTATÍSTICAS ---
+            const checklistOptions = ["Redução de Força Muscular", "Redução de ADM", "Déficit de Equilíbrio", "Alteração de Sensibilidade", "Marcha Alterada", "Incapacidade de Transferência", "Dor ao Movimento", "Espasticidade", "Encurtamento Muscular"];
+
+            const showToastMessage = (message, type = 'success') => { setToast({ message, type }); setTimeout(() => setToast(null), 3500); };
             const selectedPatient = useMemo(() => patients.find(p => p.id === selectedPatientId), [patients, selectedPatientId]);
-            const calcBarthel = (b) => Object.values(b).reduce((acc, curr) => acc + parseInt(curr), 0);
+            const calcBarthel = (b) => Object.values(b).reduce((acc, curr) => acc + parseInt(curr || 0), 0);
+
+            const getBarthelClass = (score) => {
+                if (score === 100) return { l: 'Independente', c: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+                if (score >= 91) return { l: 'Dep. Leve', c: 'bg-green-100 text-green-700 border-green-200' };
+                if (score >= 61) return { l: 'Dep. Moderada', c: 'bg-amber-100 text-amber-700 border-amber-200' };
+                if (score >= 21) return { l: 'Dep. Severa', c: 'bg-orange-100 text-orange-700 border-orange-200' };
+                return { l: 'Dep. Total', c: 'bg-red-100 text-red-700 border-red-200' };
+            };
 
             const stats = useMemo(() => {
                 const ativos = patients.filter(p => p.status === 'active').length;
@@ -256,36 +315,16 @@
                 const avaliacoes = patients.reduce((acc, p) => acc + p.evaluations.length, 0);
                 const pacsComEvolucao = patients.filter(p => p.status === 'active' && p.evaluations.length > 0);
                 const mediaBarthel = pacsComEvolucao.length > 0 ? (pacsComEvolucao.reduce((acc, p) => acc + p.evaluations.at(-1).barthel, 0) / pacsComEvolucao.length).toFixed(0) : 0;
-                
-                // Mock de gráfico mensal
                 const grafico = [{ mes: 'Jan', val: 3 }, { mes: 'Fev', val: 5 }, { mes: 'Mar', val: ativos }];
                 return { ativos, arquivo, avaliacoes, mediaBarthel, grafico };
             }, [patients]);
 
-            // --- HANDLERS (AÇÕES) ---
             const handleAuth = (e) => {
                 e.preventDefault();
                 const userMatch = loginInput.user.toLowerCase().includes('wagner') || loginInput.user.toLowerCase() === 'admin';
                 if (userMatch && loginInput.pass === credentials.pass) {
-                    setIsAuthenticated(true);
-                    setLoginInput({ user: '', pass: '' });
-                } else {
-                    showToast('Credenciais de acesso inválidas. Tente novamente.', 'error');
-                }
-            };
-
-            const handleChangePassword = (e) => {
-                e.preventDefault();
-                if (passInput.old !== credentials.pass) { showToast('Senha atual está incorreta.', 'error'); return; }
-                if (passInput.new !== passInput.confirm) { showToast('As novas senhas não coincidem.', 'error'); return; }
-                if (passInput.new.length < 6) { showToast('A senha deve ter no mínimo 6 caracteres.', 'error'); return; }
-                
-                setCredentials({ ...credentials, pass: passInput.new });
-                showToast('Senha atualizada com segurança!', 'success');
-                setTimeout(() => {
-                    setAuthView('login');
-                    setPassInput({ old: '', new: '', confirm: '' });
-                }, 1500);
+                    setIsAuthenticated(true); setLoginInput({ user: '', pass: '' });
+                } else { showToastMessage('Credenciais inválidas.', 'error'); }
             };
 
             const handleSaveEvaluation = async (e) => {
@@ -294,33 +333,20 @@
                 setIsLoading(true);
                 
                 const score = calcBarthel(evalForm.barthel);
-                const evaluationData = {
-                    date: new Date().toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}),
-                    ...evalForm, barthel: score
-                };
-
+                const evaluationData = { date: new Date().toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}), ...evalForm, barthel: score };
                 const updatedPatients = patients.map(p => p.id === selectedPatientId ? { ...p, evaluations: [...p.evaluations, evaluationData] } : p);
                 
                 try {
                     if (GOOGLE_SCRIPT_URL) {
-                        await fetch(GOOGLE_SCRIPT_URL, { 
-                            method: 'POST', mode: 'no-cors', 
-                            headers: { 'Content-Type': 'application/json' }, 
-                            body: JSON.stringify({ ...evaluationData, patientName: selectedPatient.name, clinicalDiagnosis: selectedPatient.clinicalDiagnosis }) 
-                        });
+                        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...evaluationData, patientName: selectedPatient.name, clinicalDiagnosis: selectedPatient.clinicalDiagnosis }) });
                     }
                     setTimeout(() => {
-                        setPatients(updatedPatients);
-                        setActiveView('profile');
-                        setEvalForm({ sys: '', dia: '', weight: '', echo: '', tug: '', sts: '', barthel: { alimentacao: 0, banho: 0, higiene: 0, vestir: 0, intestino: 0, bexiga: 0, banheiro: 0, transferencia: 0, mobilidade: 0, escadas: 0 }, functionalChecks: [], notes: '' });
-                        setIsLoading(false);
-                        showToast('Avaliação salva e prontuário atualizado.', 'success');
+                        setPatients(updatedPatients); setActiveView('profile'); setEvalForm(initialEvalState); setIsLoading(false);
+                        showToastMessage('Avaliação clínica salva.', 'success');
                     }, 800);
                 } catch (error) {
-                    setPatients(updatedPatients);
-                    setActiveView('profile');
-                    setIsLoading(false);
-                    showToast('Salvo no dispositivo. Erro ao sincronizar nuvem.', 'error');
+                    setPatients(updatedPatients); setActiveView('profile'); setIsLoading(false);
+                    showToastMessage('Salvo offline. Erro de nuvem.', 'error');
                 }
             };
 
@@ -330,181 +356,81 @@
                 const newId = Date.now();
                 setPatients([...patients, { ...newPatientForm, id: newId, status: 'active', evaluations: [], createdAt: new Date().toISOString().split('T')[0] }]);
                 setNewPatientForm({ name: '', age: '', clinicalDiagnosis: '', lgpdConsent: false });
-                setSelectedPatientId(newId);
-                setActiveView('profile');
-                showToast('Prontuário criado e auditado com sucesso.', 'success');
+                setSelectedPatientId(newId); setActiveView('profile'); showToastMessage('Prontuário criado e auditado.', 'success');
             };
 
             const toggleArchivePatient = (id) => {
+                const pat = patients.find(p => p.id === id);
                 setPatients(patients.map(p => p.id === id ? { ...p, status: p.status === 'active' ? 'archived' : 'active' } : p));
                 setActiveView('patients');
-                showToast('Status do paciente alterado com sucesso.', 'success');
+                showToastMessage(pat.status === 'active' ? 'Prontuário arquivado.' : 'Atendimento reativado.', 'success');
             };
 
-            const handleBarthelClick = (key, val) => setEvalForm(prev => ({ ...prev, barthel: { ...prev.barthel, [key]: val } }));
-            const handleFunctionalToggle = (opt) => setEvalForm(prev => {
-                const exists = prev.functionalChecks.includes(opt);
-                return { ...prev, functionalChecks: exists ? prev.functionalChecks.filter(i => i !== opt) : [...prev.functionalChecks, opt] };
-            });
+            const handleBarthelClick = (key, val) => {
+                setEvalForm(prev => ({ ...prev, barthel: { ...prev.barthel, [key]: val } }));
+            };
 
-            // --- RENDERIZADORES DE TELAS ---
-            
-            const renderAuthScreen = () => (
-                <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 w-full h-[50vh] bg-gradient-to-b from-emerald-600/40 to-slate-900 rounded-b-[40%]"></div>
-                    <div className="w-full max-w-sm relative z-10 animate-slide-up">
-                        <div className="text-center mb-10">
-                            <div className="w-20 h-20 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-[0_10px_30px_rgba(16,185,129,0.4)]">
-                                <Icon name="activity" size={40} strokeWidth={2.5} />
-                            </div>
-                            <h1 className="text-4xl font-black text-white tracking-tight">Fisio<span className="text-emerald-400">Home</span></h1>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.4em] mt-3">HealthTech Pro</p>
-                        </div>
-                        {authView === 'login' ? (
-                            <form onSubmit={handleAuth} className="bg-white rounded-[2.5rem] p-8 premium-shadow space-y-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Usuário de Acesso</label>
-                                    <input type="text" placeholder="Dr. Wagner" required className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={loginInput.user} onChange={e=>setLoginInput({...loginInput, user: e.target.value})} />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Senha Segura</label>
-                                    <input type="password" placeholder="••••••" required className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-black tracking-widest text-emerald-600" value={loginInput.pass} onChange={e=>setLoginInput({...loginInput, pass: e.target.value})} />
-                                </div>
-                                <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm tracking-widest uppercase hover:bg-black transition-colors shadow-lg active:scale-[0.98] mt-4 flex justify-center items-center gap-2">
-                                    ENTRAR NA CLÍNICA <Icon name="arrow-right" size={18}/>
-                                </button>
-                                <button type="button" onClick={() => setAuthView('change_password')} className="w-full py-3 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors block text-center">
-                                    Configurar Senha
-                                </button>
-                            </form>
-                        ) : (
-                            <form onSubmit={handleChangePassword} className="bg-white rounded-[2.5rem] p-8 premium-shadow space-y-4 animate-fade-in">
-                                <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                                    <button type="button" onClick={() => setAuthView('login')} className="p-2 bg-slate-50 rounded-xl text-slate-500 hover:text-slate-800 transition-colors"><Icon name="arrow-left" size={18}/></button>
-                                    <h3 className="font-black text-slate-800 text-lg">Atualizar Senha</h3>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Senha Atual</label>
-                                    <input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest" value={passInput.old} onChange={e => setPassInput({...passInput, old: e.target.value})} />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nova Senha</label>
-                                    <input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest text-emerald-600" value={passInput.new} onChange={e => setPassInput({...passInput, new: e.target.value})} />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirmar Senha</label>
-                                    <input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest text-emerald-600" value={passInput.confirm} onChange={e => setPassInput({...passInput, confirm: e.target.value})} />
-                                </div>
-                                <button type="submit" className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-xl hover:bg-emerald-700 transition-all active:scale-[0.98] mt-4">
-                                    SALVAR E VOLTAR
-                                </button>
-                            </form>
-                        )}
-                        <div className="mt-8 flex justify-center opacity-50">
-                            <span className="text-[9px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-1"><Icon name="shield-check" size={12}/> Auditoria LGPD Compliant</span>
-                        </div>
-                    </div>
-                </div>
-            );
+            const handleFunctionalToggle = (opt) => {
+                setEvalForm(prev => {
+                    const exists = prev.functionalChecks.includes(opt);
+                    return { ...prev, functionalChecks: exists ? prev.functionalChecks.filter(i => i !== opt) : [...prev.functionalChecks, opt] };
+                });
+            };
 
+            const fillBarthelMax = () => {
+                const maxBarthel = {};
+                barthelItems.forEach(item => { maxBarthel[item.id] = item.o[item.o.length - 1].v; });
+                setEvalForm(prev => ({...prev, barthel: maxBarthel}));
+            };
+
+            // --- RENDERIZADORES BLINDADOS (FUNÇÕES) ---
             const renderDashboard = () => (
                 <div className="animate-fade-in space-y-6 lg:space-y-8">
                     <header className="mb-6 lg:mb-10">
                         <h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Gestão Clínica</h2>
-                        <p className="text-sm font-medium text-slate-500 mt-1">Indicadores e produtividade mensal.</p>
+                        <p className="text-sm font-medium text-slate-500 mt-1">Bem-vindo(a), {credentials.displayName}.</p>
                     </header>
-
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                        <Card className="flex flex-col justify-between h-40">
-                            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><Icon name="users" /></div>
-                            <MetricItem label="Em Atendimento" value={stats.ativos} />
-                        </Card>
-                        <Card className="flex flex-col justify-between h-40 bg-emerald-600 text-white border-none shadow-[0_10px_30px_rgba(16,185,129,0.3)]">
-                            <div className="w-10 h-10 bg-white/20 text-white rounded-2xl flex items-center justify-center"><Icon name="trending-up" /></div>
-                            <div>
-                                <p className="text-[10px] font-black text-emerald-100 uppercase tracking-[0.15em] mb-1">Média Barthel</p>
-                                <p className="text-4xl font-black">{stats.mediaBarthel}</p>
-                            </div>
-                        </Card>
-                        <Card className="flex flex-col justify-between h-40">
-                            <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center"><Icon name="archive" /></div>
-                            <MetricItem label="Prontuários Arquivados" value={stats.arquivo} />
-                        </Card>
-                        <Card className="flex flex-col justify-between h-40">
-                            <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center"><Icon name="clipboard-check" /></div>
-                            <MetricItem label="Total de Avaliações" value={stats.avaliacoes} />
-                        </Card>
+                        <div className="card-premium p-6 flex flex-col justify-between h-40"><div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><Icon name="users" /></div><div className="mt-4"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Em Atendimento</p><p className="text-3xl font-black text-slate-800">{stats.ativos}</p></div></div>
+                        <div className="card-premium p-6 flex flex-col justify-between h-40 bg-emerald-600 text-white border-none shadow-[0_10px_30px_rgba(16,185,129,0.3)]"><div className="w-10 h-10 bg-white/20 text-white rounded-2xl flex items-center justify-center"><Icon name="trending-up" /></div><div className="mt-4"><p className="text-[10px] font-black text-emerald-100 uppercase tracking-[0.15em] mb-1">Média Barthel</p><p className="text-4xl font-black">{stats.mediaBarthel}</p></div></div>
+                        <div className="card-premium p-6 flex flex-col justify-between h-40"><div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center"><Icon name="archive" /></div><div className="mt-4"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Arquivados</p><p className="text-3xl font-black text-slate-800">{stats.arquivo}</p></div></div>
+                        <div className="card-premium p-6 flex flex-col justify-between h-40"><div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center"><Icon name="clipboard-check" /></div><div className="mt-4"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Avaliações Feitas</p><p className="text-3xl font-black text-slate-800">{stats.avaliacoes}</p></div></div>
                     </div>
-
-                    <Card>
-                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <Icon name="bar-chart-2" size={16} className="text-emerald-500"/> Fluxo de Pacientes
-                        </h3>
+                    <div className="card-premium p-6 lg:p-8">
+                        <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2"><Icon name="bar-chart-2" size={16} className="text-emerald-500"/> Fluxo de Pacientes</h3>
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={stats.grafico}>
-                                    <defs>
-                                        <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b', fontWeight: 600}} dy={10} />
-                                    <Tooltip cursor={{stroke: '#e2e8f0', strokeWidth: 2}} contentStyle={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.08)'}} />
-                                    <Area type="monotone" dataKey="val" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorVal)" />
-                                </AreaChart>
+                                <AreaChart data={stats.grafico}><defs><linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient></defs><XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b', fontWeight: 600}} dy={10} /><Tooltip cursor={{stroke: '#e2e8f0', strokeWidth: 2}} contentStyle={{borderRadius:'16px', border:'none', boxShadow:'0 10px 30px rgba(0,0,0,0.08)'}} /><Area type="monotone" dataKey="val" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorVal)" /></AreaChart>
                             </ResponsiveContainer>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             );
 
-            const renderPatientsList = () => (
+            const renderPatients = () => (
                 <div className="animate-fade-in flex flex-col h-full space-y-6">
-                    <header>
-                        <h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Prontuários</h2>
-                    </header>
-
+                    <header><h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Prontuários</h2></header>
                     <div className="flex bg-slate-200/50 p-1.5 rounded-[1.2rem] w-full max-w-sm">
                         <button onClick={() => setPatientFilter('active')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-[0.9rem] transition-all ${patientFilter === 'active' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Em Alta ({stats.ativos})</button>
                         <button onClick={() => setPatientFilter('archived')} className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-[0.9rem] transition-all ${patientFilter === 'archived' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Arquivo ({stats.arquivo})</button>
                     </div>
-
                     <div className="relative group">
                         <Icon name="search" size={20} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
-                        <input 
-                            type="text" placeholder="Nome ou diagnóstico..." 
-                            className="w-full pl-14 pr-6 py-5 bg-white rounded-[2rem] premium-shadow border border-slate-100 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all font-bold text-slate-700 text-lg"
-                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                        <input type="text" placeholder="Nome ou diagnóstico..." className="w-full pl-14 pr-6 py-5 bg-white rounded-[2rem] premium-shadow border border-slate-100 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all font-bold text-slate-700 text-lg" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
                     </div>
-
                     <div className="flex-1 space-y-4 pb-4">
                         {patients.filter(p => p.status === patientFilter && p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
                             <div key={p.id} onClick={() => { setSelectedPatientId(p.id); setActiveView('profile'); }} className="bg-white p-5 lg:p-6 rounded-[2rem] premium-shadow border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] lg:hover:scale-[1.01] transition-transform group">
                                 <div className="flex items-center gap-5">
                                     <div className={`w-14 h-14 rounded-full flex items-center justify-center font-black text-xl shadow-inner ${p.status === 'active' ? 'bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>{p.name[0]}</div>
-                                    <div>
-                                        <h3 className="font-bold text-slate-900 text-lg leading-tight group-hover:text-emerald-700 transition-colors">{p.name}</h3>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 truncate max-w-[180px] lg:max-w-md">{p.clinicalDiagnosis}</p>
-                                    </div>
+                                    <div><h3 className="font-bold text-slate-900 text-lg leading-tight group-hover:text-emerald-700 transition-colors">{p.name}</h3><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 truncate max-w-[180px] md:max-w-md">{p.clinicalDiagnosis}</p></div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <p className={`text-2xl font-black leading-none ${p.status === 'active' ? 'text-emerald-500' : 'text-slate-400'}`}>{p.evaluations.length > 0 ? p.evaluations.at(-1).barthel : '--'}</p>
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Barthel</p>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                                        <Icon name="chevron-right" size={20} />
-                                    </div>
+                                    <div className="text-right hidden sm:block"><p className={`text-2xl font-black leading-none ${p.status === 'active' ? 'text-emerald-500' : 'text-slate-400'}`}>{p.evaluations.length > 0 ? p.evaluations.at(-1).barthel : '--'}</p><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Barthel</p></div>
+                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors"><Icon name="chevron-right" size={20} /></div>
                                 </div>
                             </div>
                         ))}
-                        {patients.filter(p => p.status === patientFilter).length === 0 && (
-                            <div className="p-12 text-center text-slate-400 font-bold text-sm bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
-                                Nenhum paciente encontrado.
-                            </div>
-                        )}
                     </div>
                 </div>
             );
@@ -512,17 +438,13 @@
             const renderProfile = () => {
                 if(!selectedPatient) return null;
                 const lastEval = selectedPatient.evaluations.at(-1);
-
                 return (
                     <div className="animate-fade-in space-y-6">
                         <div className="flex items-center justify-between">
                             <button onClick={() => setActiveView('patients')} className="w-12 h-12 bg-white rounded-[1.5rem] premium-shadow flex items-center justify-center text-slate-600 active:scale-90 transition-transform"><Icon name="arrow-left" size={24} /></button>
-                            <button onClick={() => toggleArchivePatient(selectedPatient.id)} className={`px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${selectedPatient.status === 'active' ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-emerald-100 text-emerald-700'}`}>
-                                {selectedPatient.status === 'active' ? 'Arquivar Paciente' : 'Reativar'}
-                            </button>
+                            <button onClick={() => toggleArchivePatient(selectedPatient.id)} className={`px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${selectedPatient.status === 'active' ? 'bg-slate-200 text-slate-600 hover:bg-slate-300' : 'bg-emerald-100 text-emerald-700'}`}>{selectedPatient.status === 'active' ? 'Arquivar Paciente' : 'Reativar Prontuário'}</button>
                         </div>
-                        
-                        <Card className="text-center md:text-left md:flex justify-between items-center bg-gradient-to-br from-white to-slate-50">
+                        <div className="bg-white rounded-[2.5rem] p-6 lg:p-10 premium-shadow border border-slate-100/50 text-center md:text-left md:flex justify-between items-center bg-gradient-to-br from-white to-slate-50">
                             <div className="space-y-3">
                                 <div className="flex justify-center md:justify-start gap-2 mb-2">
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-full border border-emerald-100">Prontuário Digital</span>
@@ -536,61 +458,39 @@
                                     <Icon name="activity" size={20} /> AVALIAR SESSÃO
                                 </button>
                             )}
-                        </Card>
-
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <Card className="bg-slate-900 border-none !p-6 flex flex-col justify-between">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Score Barthel</p>
-                                <p className="text-6xl font-black text-white">{lastEval?.barthel || '--'}</p>
-                            </Card>
-                            <Card className="!p-6 flex flex-col justify-between">
-                                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">TUG Test</p>
-                                <p className="text-3xl font-black text-slate-800">{lastEval?.tug || '--'} <span className="text-sm text-slate-400">s</span></p>
-                            </Card>
-                            <Card className="!p-6 flex flex-col justify-between">
-                                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Senta/Levanta</p>
-                                <p className="text-3xl font-black text-slate-800">{lastEval?.sts || '--'} <span className="text-sm text-slate-400">x</span></p>
-                            </Card>
-                            <Card className="!p-6 flex flex-col justify-between">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Pressão Arterial</p>
-                                <p className="text-3xl font-black text-slate-800 tracking-tighter">{lastEval?.sys || '--'}/{lastEval?.dia || '--'}</p>
-                            </Card>
                         </div>
-
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="bg-slate-900 rounded-[2rem] p-6 premium-shadow flex flex-col justify-between">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Score Barthel</p>
+                                <div>
+                                    <p className="text-6xl font-black text-white leading-none">{lastEval?.barthel || '--'}</p>
+                                    {lastEval?.barthel !== undefined && (
+                                        <span className={`inline-block mt-3 px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border ${getBarthelClass(lastEval.barthel).c}`}>
+                                            {getBarthelClass(lastEval.barthel).l}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-[2rem] p-6 premium-shadow flex flex-col justify-between"><p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">TUG Test</p><p className="text-3xl font-black text-slate-800">{lastEval?.tug || '--'} <span className="text-sm text-slate-400">s</span></p></div>
+                            <div className="bg-white rounded-[2rem] p-6 premium-shadow flex flex-col justify-between"><p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Senta/Levanta</p><p className="text-3xl font-black text-slate-800">{lastEval?.sts || '--'} <span className="text-sm text-slate-400">x</span></p></div>
+                            <div className="bg-white rounded-[2rem] p-6 premium-shadow flex flex-col justify-between"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">P. Arterial</p><p className="text-3xl font-black text-slate-800 tracking-tighter">{lastEval?.sys || '--'}/{lastEval?.dia || '--'}</p></div>
+                        </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {selectedPatient.evaluations.length > 1 ? (
-                                <Card className="!p-6">
+                                <div className="bg-white rounded-[2.5rem] p-6 premium-shadow">
                                     <h3 className="text-xs font-black text-slate-800 mb-6 uppercase tracking-widest">Evolução Clínica</h3>
-                                    <div className="h-48 w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart data={selectedPatient.evaluations}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill:'#94a3b8', fontWeight: 600}} dy={10} />
-                                                <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontWeight:'bold' }} />
-                                                <Line type="monotone" dataKey="barthel" stroke="#10b981" strokeWidth={5} dot={{r: 6, fill: '#10b981', strokeWidth: 3, stroke: '#fff'}} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </Card>
+                                    <div className="h-48 w-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={selectedPatient.evaluations}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /><XAxis dataKey="date" fontSize={10} axisLine={false} tickLine={false} tick={{fill:'#94a3b8', fontWeight: 600}} dy={10} /><Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', fontWeight:'bold' }} /><Line type="monotone" dataKey="barthel" stroke="#10b981" strokeWidth={5} dot={{r: 6, fill: '#10b981', strokeWidth: 3, stroke: '#fff'}} /></LineChart></ResponsiveContainer></div>
+                                </div>
                             ) : (
-                                <Card className="!p-6 flex flex-col items-center justify-center text-center bg-slate-50 border-dashed">
-                                    <Icon name="line-chart" size={40} className="text-slate-300 mb-3" />
-                                    <p className="text-sm font-bold text-slate-500">Gráfico será gerado na 2ª avaliação.</p>
-                                </Card>
+                                <div className="bg-white rounded-[2.5rem] p-6 premium-shadow flex flex-col items-center justify-center text-center border border-slate-100"><Icon name="line-chart" size={40} className="text-slate-300 mb-3" /><p className="text-sm font-bold text-slate-500">Gráfico será gerado na 2ª avaliação.</p></div>
                             )}
-                            
-                            <Card className="!p-6 flex flex-col">
+                            <div className="bg-white rounded-[2.5rem] p-6 premium-shadow flex flex-col">
                                 <h3 className="text-[10px] font-black text-slate-400 mb-5 uppercase tracking-[0.2em]">Últimos Achados Funcionais</h3>
                                 <div className="flex flex-wrap gap-2 mb-6">
-                                    {lastEval?.functionalChecks.map((c, i) => (
-                                        <span key={i} className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wide border border-emerald-100">{c}</span>
-                                    )) || <span className="text-xs text-slate-500 italic">Sem registros.</span>}
+                                    {lastEval?.functionalChecks?.length > 0 ? lastEval.functionalChecks.map((c, i) => (<span key={i} className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wide border border-emerald-100">{c}</span>)) : <span className="text-xs text-slate-500 italic">Sem registros.</span>}
                                 </div>
-                                <div className="bg-slate-50 p-5 rounded-[1.5rem] mt-auto">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Notas da Sessão</p>
-                                    <p className="text-sm font-medium text-slate-700 italic">"{lastEval?.notes || 'Nenhuma nota registrada.'}"</p>
-                                </div>
-                            </Card>
+                                <div className="bg-slate-50 p-5 rounded-[1.5rem] mt-auto"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Notas da Sessão</p><p className="text-sm font-medium text-slate-700 italic">"{lastEval?.notes || 'Nenhuma nota registrada.'}"</p></div>
+                            </div>
                         </div>
                     </div>
                 );
@@ -601,76 +501,62 @@
                     <div className="flex items-center gap-4 mb-6">
                         <button onClick={() => setActiveView('profile')} className="w-12 h-12 bg-white rounded-[1.5rem] premium-shadow flex items-center justify-center text-slate-600 active:scale-90"><Icon name="arrow-left" size={24} /></button>
                         <div>
-                            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Registrar Evolução</p>
-                            <h2 className="text-2xl font-black text-slate-900 leading-none">{selectedPatient?.name}</h2>
+                            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Ferramenta Clínica</p>
+                            <h2 className="text-2xl font-black text-slate-900 leading-none">{selectedPatient.name}</h2>
                         </div>
                     </div>
-
                     <form onSubmit={handleSaveEvaluation} className="space-y-6 pb-4">
-                        <Card className="space-y-8">
-                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="stethoscope" size={18} className="text-emerald-500"/> Vitais & Testes</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <SmartTUGTimer value={evalForm.tug} onChange={(v) => setEvalForm({...evalForm, tug: v})} />
+                            <SmartSTSCounter value={evalForm.sts} onChange={(v) => setEvalForm({...evalForm, sts: v})} />
+                        </div>
+                        <div className="bg-white rounded-[2rem] p-6 lg:p-8 premium-shadow space-y-6">
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2 border-b border-slate-100 pb-4"><Icon name="activity" size={18} className="text-emerald-500"/> Outros Sinais Vitais</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {[{id:'sys',l:'PA Sistólica',p:'120'}, {id:'dia',l:'PA Diastólica',p:'80'}, {id:'weight',l:'Peso (kg)',p:'75.0'}, {id:'echo',l:'ECO (cm)',p:'1.2'}].map(f => (
-                                    <div key={f.id} className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{f.l}</label>
-                                        <input type="text" inputMode="decimal" placeholder={f.p} className="w-full input-soft rounded-[1.2rem] px-5 py-4 font-bold text-slate-800" value={evalForm[f.id]} onChange={e => setEvalForm({...evalForm, [f.id]: e.target.value})} />
-                                    </div>
+                                    <div key={f.id} className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{f.l}</label><input type="text" inputMode="decimal" placeholder={f.p} className="w-full input-soft rounded-[1.2rem] px-5 py-4 font-bold text-slate-800" value={evalForm[f.id]} onChange={e => setEvalForm({...evalForm, [f.id]: e.target.value})} /></div>
                                 ))}
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-50">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-blue-500 uppercase tracking-widest ml-1">TUG Test (Segundos)</label>
-                                    <input type="number" step="0.1" inputMode="decimal" placeholder="0.0" className="w-full bg-blue-50 border-2 border-transparent rounded-[1.5rem] px-5 py-5 font-black text-3xl text-blue-600 focus:border-blue-200 transition-colors text-center" value={evalForm.tug} onChange={e => setEvalForm({...evalForm, tug: e.target.value})} />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-1">Senta/Levanta (Repetições)</label>
-                                    <input type="number" inputMode="numeric" placeholder="0" className="w-full bg-emerald-50 border-2 border-transparent rounded-[1.5rem] px-5 py-5 font-black text-3xl text-emerald-600 focus:border-emerald-200 transition-colors text-center" value={evalForm.sts} onChange={e => setEvalForm({...evalForm, sts: e.target.value})} />
+                        </div>
+                        <div className="bg-white rounded-[2rem] p-6 lg:p-8 premium-shadow space-y-6">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
+                                <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="clipboard-list" size={18} className="text-emerald-500"/> Escala Barthel Assistida</h3>
+                                <div className="flex items-center gap-3">
+                                    <button type="button" onClick={fillBarthelMax} className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full font-black text-[9px] uppercase tracking-widest active:scale-95">Marcar 100 pts</button>
+                                    <div className="flex flex-col items-end">
+                                        <span className="bg-slate-900 text-white font-black px-5 py-2 rounded-full text-base shadow-lg leading-none">{calcBarthel(evalForm.barthel)}</span>
+                                        <span className={`mt-2 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest border ${getBarthelClass(calcBarthel(evalForm.barthel)).c}`}>{getBarthelClass(calcBarthel(evalForm.barthel)).l}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </Card>
-
-                        <Card className="space-y-6">
-                            <div className="flex justify-between items-center border-b border-slate-50 pb-4">
-                                <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="clipboard-list" size={18} className="text-emerald-500"/> Escala Barthel</h3>
-                                <span className="bg-slate-900 text-white font-black px-5 py-2 rounded-full text-base shadow-lg">{calcBarthel(evalForm.barthel)}</span>
-                            </div>
-                            <div className="space-y-3">
-                                {[
-                                    {id:'alimentacao',l:'Alimentação',o:[0,5,10]}, {id:'banho',l:'Banho',o:[0,5]}, {id:'higiene',l:'Higiene Pessoal',o:[0,5]},
-                                    {id:'vestir',l:'Vestir-se',o:[0,5,10]}, {id:'intestino',l:'Intestino',o:[0,5,10]}, {id:'bexiga',l:'Bexiga',o:[0,5,10]},
-                                    {id:'banheiro',l:'Banheiro',o:[0,5,10]}, {id:'transferencia',l:'Transferências',o:[0,5,10,15]}, {id:'mobilidade',l:'Mobilidade',o:[0,5,10,15]}, {id:'escadas',l:'Escadas',o:[0,5,10]}
-                                ].map(item => (
-                                    <div key={item.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-[1.2rem] gap-3 border border-slate-100">
-                                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{item.l}</span>
+                            <div className="grid gap-3">
+                                {barthelItems.map(item => (
+                                    <div key={item.id} className="flex flex-col lg:flex-row lg:items-center justify-between p-3 bg-slate-50 rounded-[1.2rem] gap-3 border border-slate-100">
+                                        <span className="text-[11px] font-black text-slate-600 uppercase tracking-widest ml-2">{item.l}</span>
                                         <div className="flex gap-2">
-                                            {item.o.map(v => (
-                                                <button key={v} type="button" onClick={() => handleBarthelClick(item.id, v)} className={`flex-1 md:w-14 h-12 rounded-[1rem] text-sm font-black transition-all ${evalForm.barthel[item.id] === v ? 'barthel-btn-active' : 'bg-white text-slate-400 shadow-sm border border-slate-200 active:bg-slate-50'}`}>
-                                                    {v}
+                                            {item.o.map(opt => (
+                                                <button key={opt.v} type="button" onClick={() => handleBarthelClick(item.id, opt.v)} className={`flex-1 lg:w-24 py-3 rounded-xl text-xs font-black uppercase tracking-wide transition-all ${evalForm.barthel[item.id] === opt.v ? 'barthel-btn-active' : 'bg-white text-slate-400 shadow-sm border border-slate-200 active:bg-slate-50'}`}>
+                                                    {opt.v} <span className="block text-[8px] font-bold opacity-70 mt-0.5">{opt.t}</span>
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </Card>
-
-                        <Card className="space-y-6">
-                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2 mb-2"><Icon name="check-square" size={18} className="text-emerald-500"/> Achados Clínicos</h3>
+                        </div>
+                        <div className="bg-white rounded-[2rem] p-6 lg:p-8 premium-shadow space-y-6">
+                            <h3 className="font-black text-slate-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2 mb-2"><Icon name="check-square" size={18} className="text-emerald-500"/> Checklist e Conduta</h3>
                             <div className="flex flex-wrap gap-2">
                                 {checklistOptions.map(opt => {
                                     const isChecked = evalForm.functionalChecks.includes(opt);
-                                    return (
-                                    <button key={opt} type="button" onClick={() => handleFunctionalToggle(opt)} className={`px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border-2 ${isChecked ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-400'}`}>
-                                        {opt}
-                                    </button>
-                                )})}
+                                    return (<button key={opt} type="button" onClick={() => handleFunctionalToggle(opt)} className={`px-4 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border-2 ${isChecked ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-400'}`}>{opt}</button>);
+                                })}
                             </div>
-                            <textarea placeholder="Notas detalhadas de evolução e conduta..." className="w-full input-soft rounded-[1.5rem] p-5 h-40 text-sm font-medium text-slate-800 mt-2" value={evalForm.notes} onChange={e => setEvalForm({...evalForm, notes: e.target.value})} />
-                        </Card>
-
+                            <textarea placeholder="Notas detalhadas da sessão..." className="w-full input-soft rounded-[1.5rem] p-5 h-40 text-sm font-medium text-slate-800 mt-2" value={evalForm.notes} onChange={e => setEvalForm({...evalForm, notes: e.target.value})} />
+                        </div>
                         <button type="submit" disabled={isLoading} className={`w-full py-6 rounded-[2rem] font-black text-sm tracking-[0.2em] uppercase shadow-2xl transition-all flex items-center justify-center gap-3 ${isLoading ? 'bg-slate-300 text-slate-500' : 'bg-slate-900 text-white hover:bg-black active:scale-95 shadow-slate-900/30'}`}>
                             {isLoading ? <Icon name="loader" className="animate-spin" /> : <Icon name="save" size={20} />}
-                            {isLoading ? "PROCESSANDO..." : "SALVAR AVALIAÇÃO CLINICA"}
+                            {isLoading ? "PROCESSANDO..." : "FINALIZAR AVALIAÇÃO"}
                         </button>
                     </form>
                 </div>
@@ -678,130 +564,85 @@
 
             const renderNewPatient = () => (
                 <div className="animate-fade-in max-w-xl mx-auto lg:mt-6">
-                    <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+                    <div className="bg-white rounded-[2.5rem] p-8 lg:p-12 premium-shadow">
                         <div className="text-center mb-10">
                             <div className="w-16 h-16 bg-emerald-600 text-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-[0_10px_30px_rgba(16,185,129,0.3)]"><Icon name="user-plus" size={28}/></div>
                             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Novo Paciente</h2>
                         </div>
                         <form onSubmit={handleCreatePatient} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Nome Completo</label>
-                                <input required type="text" placeholder="Ex: Francisco Santos" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.name} onChange={e => setNewPatientForm({...newPatientForm, name: e.target.value})} />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Diagnóstico / CID</label>
-                                <input required type="text" placeholder="Ex: Parkinson" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.clinicalDiagnosis} onChange={e => setNewPatientForm({...newPatientForm, clinicalDiagnosis: e.target.value})} />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Idade (Anos)</label>
-                                <input required type="number" inputMode="numeric" placeholder="Ex: 72" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.age} onChange={e => setNewPatientForm({...newPatientForm, age: e.target.value})} />
-                            </div>
-
-                            {/* LGPD Premium Switch */}
+                            <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Nome Completo</label><input required type="text" placeholder="Ex: Francisco Santos" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.name} onChange={e => setNewPatientForm({...newPatientForm, name: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Diagnóstico / CID</label><input required type="text" placeholder="Ex: Parkinson" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.clinicalDiagnosis} onChange={e => setNewPatientForm({...newPatientForm, clinicalDiagnosis: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Idade (Anos)</label><input required type="number" inputMode="numeric" placeholder="Ex: 72" className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={newPatientForm.age} onChange={e => setNewPatientForm({...newPatientForm, age: e.target.value})} /></div>
                             <div className={`mt-6 p-5 rounded-[1.5rem] border-2 cursor-pointer transition-all ${newPatientForm.lgpdConsent ? 'bg-emerald-50 border-emerald-500' : 'bg-slate-50 border-slate-200'}`} onClick={() => setNewPatientForm({...newPatientForm, lgpdConsent: !newPatientForm.lgpdConsent})}>
                                 <div className="flex items-start gap-4">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors mt-0.5 ${newPatientForm.lgpdConsent ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-transparent'}`}>
-                                        <Icon name="check" size={14} />
-                                    </div>
-                                    <div className="select-none">
-                                        <strong className={`block mb-1 text-[10px] uppercase tracking-widest font-black ${newPatientForm.lgpdConsent ? 'text-emerald-700' : 'text-slate-500'}`}>Aceite LGPD Obrigatório</strong>
-                                        <p className="text-[11px] font-bold text-slate-500 leading-snug">O paciente autorizou o registro e tratamento de dados de saúde no prontuário digital seguro.</p>
-                                    </div>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors mt-0.5 ${newPatientForm.lgpdConsent ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-transparent'}`}><Icon name="check" size={14} /></div>
+                                    <div className="select-none"><strong className={`block mb-1 text-[10px] uppercase tracking-widest font-black ${newPatientForm.lgpdConsent ? 'text-emerald-700' : 'text-slate-500'}`}>Aceite LGPD Obrigatório</strong><p className="text-[11px] font-bold text-slate-500 leading-snug">O paciente autorizou o registro e tratamento de dados de saúde no prontuário digital seguro.</p></div>
                                 </div>
                             </div>
-
                             <div className="pt-6 pb-2 space-y-4">
-                                <button type="submit" disabled={!newPatientForm.lgpdConsent || !newPatientForm.name} className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${newPatientForm.lgpdConsent && newPatientForm.name ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20 hover:bg-black' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
-                                    ABRIR PRONTUÁRIO
-                                </button>
+                                <button type="submit" disabled={!newPatientForm.lgpdConsent || !newPatientForm.name} className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${newPatientForm.lgpdConsent && newPatientForm.name ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20 hover:bg-black' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>ABRIR PRONTUÁRIO</button>
                                 <button type="button" onClick={() => setActiveView('patients')} className="w-full py-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Cancelar Operação</button>
                             </div>
                         </form>
-                    </Card>
+                    </div>
                 </div>
             );
 
-            // --- MAIN RENDER ---
-            if (!isAuthenticated) return renderAuthScreen();
+            // --- FLUXO PRINCIPAL DO APP ---
+            if (!isAuthenticated) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900 relative overflow-hidden">
+                        <div className="absolute top-0 w-full h-[50vh] bg-gradient-to-b from-emerald-600/40 to-slate-900 rounded-b-[40%]"></div>
+                        <div className="w-full max-w-sm relative z-10 animate-slide-up">
+                            {toast && (<div className="absolute -top-16 left-1/2 -translate-x-1/2 w-full text-center toast-enter z-50"><div className={`inline-flex px-4 py-2 rounded-xl shadow-lg font-bold text-xs ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>{toast.message}</div></div>)}
+                            <div className="text-center mb-10"><div className="w-20 h-20 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-[0_10px_30px_rgba(16,185,129,0.4)]"><Icon name="activity" size={40} strokeWidth={2.5} /></div><h1 className="text-4xl font-black text-white tracking-tight">Fisio<span className="text-emerald-400">Home</span></h1><p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.4em] mt-3">HealthTech Pro</p></div>
+                            {authView === 'login' ? (
+                                <form onSubmit={handleAuth} className="bg-white rounded-[2.5rem] p-8 premium-shadow space-y-5">
+                                    <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Usuário de Acesso</label><input type="text" placeholder="Dr. Wagner" required className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-bold text-slate-800" value={loginInput.user} onChange={e=>setLoginInput({...loginInput, user: e.target.value})} /></div>
+                                    <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Senha Segura</label><input type="password" placeholder="••••••" required className="w-full input-soft rounded-[1.5rem] px-5 py-4 font-black tracking-widest text-emerald-600" value={loginInput.pass} onChange={e=>setLoginInput({...loginInput, pass: e.target.value})} /></div>
+                                    <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm tracking-widest uppercase hover:bg-black transition-colors shadow-lg active:scale-[0.98] mt-4 flex justify-center items-center gap-2">ENTRAR <Icon name="arrow-right" size={18}/></button>
+                                    <button type="button" onClick={() => setAuthView('change_password')} className="w-full py-3 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors block text-center">Configurar Senha</button>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleChangePassword} className="bg-white rounded-[2.5rem] p-8 premium-shadow space-y-4 animate-fade-in">
+                                    <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4"><button type="button" onClick={() => setAuthView('login')} className="p-2 bg-slate-50 rounded-xl text-slate-500 hover:text-slate-800 transition-colors"><Icon name="arrow-left" size={18}/></button><h3 className="font-black text-slate-800 text-lg">Atualizar Senha</h3></div>
+                                    <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Senha Atual</label><input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest" value={passInput.old} onChange={e => setPassInput({...passInput, old: e.target.value})} /></div>
+                                    <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nova Senha</label><input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest text-emerald-600" value={passInput.new} onChange={e => setPassInput({...passInput, new: e.target.value})} /></div>
+                                    <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirmar Senha</label><input type="password" required className="w-full input-soft rounded-2xl px-5 py-3 font-black tracking-widest text-emerald-600" value={passInput.confirm} onChange={e => setPassInput({...passInput, confirm: e.target.value})} /></div>
+                                    <button type="submit" className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black shadow-xl hover:bg-emerald-700 transition-all active:scale-[0.98] mt-4">SALVAR E VOLTAR</button>
+                                </form>
+                            )}
+                            <div className="mt-8 flex justify-center opacity-50"><span className="text-[9px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-1"><Icon name="shield-check" size={12}/> Auditoria LGPD Compliant</span></div>
+                        </div>
+                    </div>
+                );
+            }
 
             return (
                 <div className="app-layout">
-                    {/* Toast Notification */}
-                    {toast && (
-                        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] toast-enter">
-                            <div className={`px-5 py-3.5 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] flex items-center gap-3 font-bold text-xs uppercase tracking-wider ${toast.type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'}`}>
-                                <Icon name={toast.type === 'success' ? 'check-circle-2' : 'alert-circle'} size={16} />
-                                {toast.message}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Mobile Header */}
-                    <div className="mobile-header mobile-only">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-slate-900 p-2 rounded-xl text-white"><Icon name="activity" size={18} /></div>
-                            <h1 className="text-xl font-black tracking-tight text-slate-900">Fisio<span className="text-emerald-500">Home</span></h1>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-600">
-                            {credentials.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
-                        </div>
-                    </div>
-
-                    {/* Desktop Sidebar */}
+                    {toast && (<div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] toast-enter w-[90%] max-w-sm"><div className={`px-5 py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] flex items-center gap-3 font-bold text-xs uppercase tracking-wider ${toast.type === 'success' ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'}`}><Icon name={toast.type === 'success' ? 'check-circle-2' : 'alert-circle'} size={18} />{toast.message}</div></div>)}
+                    <header className="mobile-header mobile-only"><div className="flex items-center gap-3"><div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-md"><Icon name="activity" size={18} /></div><h1 className="text-xl font-black tracking-tight text-slate-900">Fisio<span className="text-emerald-500">Home</span></h1></div><div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-600 premium-shadow">{credentials.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}</div></header>
+                    
                     <aside className="desktop-sidebar">
-                        <div className="p-8 pb-4">
-                            <div className="flex items-center gap-3 mb-12">
-                                <div className="bg-slate-900 p-3 rounded-[1.2rem] text-white shadow-lg"><Icon name="activity" size={24} /></div>
-                                <div>
-                                    <h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Fisio<span className="text-emerald-500">Home</span></h1>
-                                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mt-1">HealthTech Pro</p>
-                                </div>
-                            </div>
-                            <nav className="space-y-2">
-                                <button onClick={() => setActiveView('management')} className={`w-full flex items-center gap-4 px-5 py-4 rounded-[1.2rem] font-black text-xs uppercase tracking-widest transition-colors ${activeView === 'management' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`}>
-                                    <Icon name="layout-dashboard" size={18} /> Dashboard
-                                </button>
-                                <button onClick={() => setActiveView('patients')} className={`w-full flex items-center gap-4 px-5 py-4 rounded-[1.2rem] font-black text-xs uppercase tracking-widest transition-colors ${['patients','profile','eval'].includes(activeView) ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`}>
-                                    <Icon name="users" size={18} /> Prontuários
-                                </button>
-                            </nav>
-                        </div>
-                        <div className="mt-auto p-8 border-t border-slate-100 bg-slate-50/50">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-black premium-shadow">
-                                    {credentials.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
-                                </div>
-                                <div>
-                                    <p className="text-xs font-black text-slate-800">{credentials.displayName}</p>
-                                    <p className="text-[9px] text-emerald-600 uppercase font-black tracking-widest mt-0.5">Sócio Proprietário</p>
-                                </div>
-                            </div>
-                        </div>
+                        <div className="p-8 pb-4"><div className="flex items-center gap-3 mb-12"><div className="bg-slate-900 p-3 rounded-[1.2rem] text-white shadow-lg"><Icon name="activity" size={24} /></div><div><h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">Fisio<span className="text-emerald-500">Home</span></h1><p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mt-1">HealthTech Pro</p></div></div><nav className="space-y-2"><button onClick={() => setActiveView('management')} className={`w-full flex items-center gap-4 px-5 py-4 rounded-[1.2rem] font-black text-xs uppercase tracking-widest transition-colors ${activeView === 'management' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`}><Icon name="layout-dashboard" size={18} /> Dashboard</button><button onClick={() => { setActiveView('patients'); setSelectedPatientId(null); }} className={`w-full flex items-center gap-4 px-5 py-4 rounded-[1.2rem] font-black text-xs uppercase tracking-widest transition-colors ${['patients','profile','eval','new_patient'].includes(activeView) ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:bg-slate-50'}`}><Icon name="users" size={18} /> Prontuários</button></nav></div>
+                        <div className="mt-auto p-8 border-t border-slate-100 bg-slate-50/50"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-black premium-shadow">{credentials.displayName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}</div><div><p className="text-xs font-black text-slate-800">{credentials.displayName}</p><p className="text-[9px] text-emerald-600 uppercase font-black tracking-widest mt-0.5">Gestor de Auditoria</p></div></div></div>
                     </aside>
 
-                    {/* Main Content Area */}
-                    <main className="mobile-content">
-                        <div className="max-w-6xl mx-auto">
+                    <main className="mobile-content px-4 lg:px-12">
+                        <div className="max-w-5xl mx-auto">
                             {activeView === 'management' && renderDashboard()}
-                            {activeView === 'patients' && renderPatientsList()}
+                            {activeView === 'patients' && renderPatients()}
                             {activeView === 'profile' && renderProfile()}
                             {activeView === 'eval' && renderEvalForm()}
                             {activeView === 'new_patient' && renderNewPatient()}
                         </div>
                     </main>
 
-                    {/* Mobile Dynamic Island Nav */}
                     {['management', 'patients'].includes(activeView) && (
                         <nav className="floating-nav mobile-only">
-                            <button onClick={() => setActiveView('management')} className={`p-3 rounded-full transition-colors ${activeView === 'management' ? 'text-emerald-400 bg-white/10' : 'text-slate-400 hover:text-white'}`}>
-                                <Icon name="layout-dashboard" size={24} />
-                            </button>
-                            <button onClick={() => setActiveView('new_patient')} className="w-14 h-14 rounded-full fab-center text-white flex items-center justify-center">
-                                <Icon name="plus" size={28}/>
-                            </button>
-                            <button onClick={() => setActiveView('patients')} className={`p-3 rounded-full transition-colors ${activeView === 'patients' ? 'text-emerald-400 bg-white/10' : 'text-slate-400 hover:text-white'}`}>
-                                <Icon name="users" size={24} />
-                            </button>
+                            <button onClick={() => setActiveView('management')} className={`p-3 rounded-full transition-colors ${activeView === 'management' ? 'text-emerald-400 bg-white/10' : 'text-slate-400 hover:text-white'}`}><Icon name="layout-dashboard" size={24} /></button>
+                            <button onClick={() => setActiveView('new_patient')} className="w-14 h-14 rounded-full fab-center text-white flex items-center justify-center"><Icon name="plus" size={28}/></button>
+                            <button onClick={() => setActiveView('patients')} className={`p-3 rounded-full transition-colors ${activeView === 'patients' ? 'text-emerald-400 bg-white/10' : 'text-slate-400 hover:text-white'}`}><Icon name="users" size={24} /></button>
                         </nav>
                     )}
                 </div>
